@@ -1,3 +1,4 @@
-export const RES_PER_PAGE = 4;
+export const API_BASE =
+  import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
 
-export const USER_ROLES = ["ADMIN", "USER"];
+export const LIMIT_RES = 3;

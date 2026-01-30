@@ -2,30 +2,10 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
-import Home from "./pages/Home";
-import Tour from "./pages/Tour";
-import ConfirmBookingPage from "./pages/ConfirmBookingPage";
-import ProtectedRoute from "../ProtectedRoute";
-import Login from "./pages/Login";
-import UserLayout from "./components/UserLayout";
-import Profile from "./pages/user/Profile";
-import Bookings from "./pages/user/Bookings";
-import SignUp from "./pages/SignUp";
-import AdminRoute from "../ProtectedAdminRoute";
-import AdminLayout from "./components/AdminLayout";
-import Unauthorized from "./pages/unauthorized";
-import Tours from "./pages/Tours";
-import Users from "./pages/admin/Users";
-import ManageBookings from "./pages/admin/Bookings";
-import Contact from "./pages/Contact";
-import Subscribe from "./components/Home_Sections/Subscribe";
-import Footer from "./components/Home_Sections/Footer";
-import DestinationPage from "./pages/Destination";
-import TestomonialPage from "./pages/Testomonial";
-import GuidesPage from "./pages/Guides";
-import AboutUs from "./pages/AboutUs";
-import GalleryPage from "./pages/Gallery";
-import OurServicesPage from "./pages/OurServices";
+import Login from "./pages/LoginPage";
+import AppLayout from "./components/AppLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Dashboard from "./pages/User/DashBoardPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,71 +21,36 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Login />} />
 
-          <Route path="/tours/:tourId" element={<Tour />} />
-
-          <Route path="/login" element={<Login />} />
-
-          <Route path="/signup" element={<SignUp />} />
-
-          <Route path="/tours" element={<Tours />} />
-
-          <Route path="/unauthorized" element={<Unauthorized />} />
-
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/destination" element={<DestinationPage />} />
-          <Route path="/testimonial" element={<TestomonialPage />} />
-
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="/services" element={<OurServicesPage />} />
-          <Route path="/guides" element={<GuidesPage />} />
-          <Route path="/gallery" element={<GalleryPage />} />
-
-          {/* Protected Confirming */}
-          <Route
-            path="/confirmBooking/:tourId"
-            element={
-              <ProtectedRoute>
-                <ConfirmBookingPage />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Protected User Routes */}
-          <Route
-            path="user"
-            element={
-              <ProtectedRoute>
-                <UserLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="profile" element={<Profile />} />
-            <Route path="bookings" element={<Bookings />} />
-          </Route>
-
-          {/* Protected Admin Routes */}
+          {/* Admin Routes */}
           <Route
             path="/admin"
             element={
-              <AdminRoute>
-                <AdminLayout />
-              </AdminRoute>
+              <ProtectedRoute role="ADMIN">
+                <AppLayout role="ADMIN" />
+              </ProtectedRoute>
             }
           >
-            <Route path="bookings" element={<ManageBookings />} />
-            <Route path="tours" element={<h2>tours</h2>} />
-            <Route path="users" element={<Users />} />
+            <Route path="horses" element={<>horses</>} />
+            <Route path="feeders" element={<h2>feeders</h2>} />
+            <Route path="users" element={<>users</>} />
           </Route>
 
-          {/* <Route path="/tours" element={<Tours />} />
-            
-            
-            <Route path="*" element={<PageNotFound />} /> */}
+          {/* User Routes */}
+          <Route
+            path="/user"
+            element={
+              <ProtectedRoute role="USER">
+                <AppLayout role="USER" />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="dashboard" element={<Dashboard />} />
+          </Route>
+
+          {/*  */}
         </Routes>
-        <Subscribe />
-        <Footer />
       </BrowserRouter>
 
       <Toaster
@@ -113,30 +58,45 @@ function App() {
         gutter={16}
         containerStyle={{ margin: "12px" }}
         toastOptions={{
+          // ✅ SUCCESS: Light bg + Green text + Green icon
           success: {
             duration: 4000,
             style: {
               fontSize: "15px",
               maxWidth: "420px",
               padding: "14px 22px",
-              backgroundColor: "var(--color-light)",
-              color: "var(--color-primary)",
+              backgroundColor: "#f0fdf4", // Light green bg
+              color: "#166534", // Dark green text
+              border: "1px solid #bbf7d0", // Light green border
+              borderRadius: "12px",
+            },
+            iconTheme: {
+              primary: "#15803d", // Green checkmark
+              secondary: "#f0fdf4", // Light green bg
             },
           },
+          // ✅ ERROR: Dark green bg + White text (inverted for contrast)
           error: {
             duration: 6000,
             style: {
               fontSize: "15px",
               maxWidth: "420px",
               padding: "14px 22px",
-              backgroundColor: "var(--color-primary)",
-              color: "var(--color-light)",
+              backgroundColor: "#166534", // Dark green bg
+              color: "#f0fdf4", // Light green text
+              border: "1px solid #15803d", // Green border
+              borderRadius: "12px",
+            },
+            iconTheme: {
+              primary: "#f0fdf4", // White X icon
+              secondary: "#166534", // Dark green bg
             },
           },
+          // Base styles
           style: {
             fontFamily: "'Roboto', sans-serif",
-            borderRadius: "8px",
-            boxShadow: "0 2px 15px rgba(0, 0, 0, 0.15)",
+            borderRadius: "12px",
+            boxShadow: "0 10px 25px rgba(22, 101, 52, 0.15)", // Green shadow
           },
         }}
       />
