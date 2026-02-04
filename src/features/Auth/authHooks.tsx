@@ -1,4 +1,4 @@
-// hooks/useAuth.js - Improved Version
+// hooks/useAuth.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getCurrentUser,
@@ -9,7 +9,27 @@ import {
 } from "../../services/apiAuth";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { User } from "@/types";
 
+// ==============================
+// Types
+// ==============================
+
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
+export interface SignupInput {
+  name: string;
+  email: string;
+  password: string;
+  passwordConfirm: string;
+}
+
+// ==============================
+// useLogin Hook
+// ==============================
 export function useLogin() {
   const queryClient = useQueryClient();
 
@@ -17,8 +37,8 @@ export function useLogin() {
     mutate: login,
     isPending,
     error,
-  } = useMutation({
-    mutationFn: ({ email, password }) => loginApi(email, password), // Fixed API signature
+  } = useMutation<User, Error, LoginInput>({
+    mutationFn: ({ email, password }) => loginApi(email, password),
     onSuccess: () => {
       toast.success("Logged in successfully");
       // Invalidate + refetch user session
@@ -27,12 +47,15 @@ export function useLogin() {
     onError: (err) => {
       toast.error(err.message || "Login failed");
     },
-    retry: false, // Don't retry auth failures
+    retry: false,
   });
 
-  return { isPending, login, error };
+  return { login, isPending, error };
 }
 
+// ==============================
+// useSession Hook
+// ==============================
 export function useSession() {
   const {
     data: user,
@@ -41,11 +64,10 @@ export function useSession() {
     error,
     refetch,
     isFetching,
-  } = useQuery({
+  } = useQuery<User, Error>({
     queryKey: ["user"],
     queryFn: getCurrentUser,
-    staleTime: 5 * 60 * 1000, // 5 minutes cache
-    gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
+    staleTime: 5 * 60 * 1000,
     retry: 1,
     retryDelay: 1000,
   });
@@ -61,6 +83,9 @@ export function useSession() {
   };
 }
 
+// ==============================
+// useLogout Hook
+// ==============================
 export function useLogout() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -69,18 +94,15 @@ export function useLogout() {
     mutate: logout,
     isPending,
     error,
-  } = useMutation({
+  } = useMutation<void, Error>({
     mutationFn: logoutApi,
     onSuccess: () => {
-      // Clear ALL queries + cache
       queryClient.clear();
-      queryClient.removeQueries();
       toast.success("Logged out successfully");
       navigate("/", { replace: true });
     },
     onError: (err) => {
       toast.error(err.message || "Logout failed");
-      // Force clear cache even on error
       queryClient.clear();
     },
     retry: false,
@@ -89,26 +111,31 @@ export function useLogout() {
   return { logout, isPending, error };
 }
 
+// ==============================
+// useSignup Hook
+// ==============================
 export function useSignup() {
   const queryClient = useQueryClient();
-  //   const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const {
     mutate: signUp,
     isPending,
     error,
-  } = useMutation({
+  } = useMutation<
+    User, // response
+    Error, // error
+    SignupInput // variables
+  >({
     mutationFn: ({ name, email, password, passwordConfirm }) =>
       signUpApi({ name, email, password, passwordConfirm }),
     onSuccess: () => {
       toast.success("Account successfully created! Please log in.");
-      // Clear cache for fresh login
       queryClient.clear();
-
-      //   navigate("/login", { replace: true }); // Go to login, not home
+      // navigate("/login", { replace: true });
     },
-    onError: (error) => {
-      toast.error(error.message || "Signup failed");
+    onError: (err) => {
+      toast.error(err.message || "Signup failed");
     },
     retry: false,
   });

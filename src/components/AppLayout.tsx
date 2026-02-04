@@ -6,7 +6,11 @@ import { useSession } from "../features/Auth/authHooks";
 import Sidebar from "./Sidebar";
 import { WebSocketProvider } from "./WebSocketContext";
 
-export default function AppLayout({ role = "USER" }) {
+export default function AppLayout({
+  role = "USER",
+}: {
+  role: "USER" | "ADMIN";
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useSession();
 

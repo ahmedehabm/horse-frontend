@@ -3,7 +3,13 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useSession } from "../features/Auth/authHooks";
 import Spinner from "./Spinner";
 
-export default function ProtectedRoute({ children, role = "USER" }) {
+export default function ProtectedRoute({
+  children,
+  role = "USER",
+}: {
+  children: React.ReactNode;
+  role?: "USER" | "ADMIN";
+}) {
   const { user, isLoading } = useSession();
   const location = useLocation();
 

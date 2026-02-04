@@ -1,4 +1,10 @@
 import {
+  ServerToClientEvents,
+  SocketIOContextValue,
+  TypedSocket,
+  ClientToServerEvents,
+} from "@/types";
+import {
   createContext,
   useContext,
   useEffect,
@@ -6,19 +12,20 @@ import {
   useState,
   useCallback,
   useMemo,
+  ReactNode,
 } from "react";
 import { io } from "socket.io-client";
 
-const SocketIOContext = createContext(null);
-
 const SOCKET_URL = "http://localhost:3000";
 
-export function SocketIOProvider({ children }) {
-  const socketRef = useRef(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [connectionError, setConnectionError] = useState(null);
+const SocketIOContext = createContext<SocketIOContextValue | null>(null);
 
-  const isMountedRef = useRef(false);
+export function SocketIOProvider({ children }: { children: ReactNode }) {
+  const socketRef = useRef<TypedSocket | null>(null);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+
+  const isMountedRef = useRef<boolean>(false);
 
   const connect = useCallback(() => {
     // Guard: Already have a socket instance
@@ -31,7 +38,7 @@ export function SocketIOProvider({ children }) {
       console.log("🔌 Connecting to Socket.IO:", SOCKET_URL);
 
       // ✅ Create Socket.IO client with auto-reconnection
-      const socket = io(SOCKET_URL, {
+      const socket: TypedSocket = io(SOCKET_URL, {
         // Auto-reconnection settings (client-side)
         reconnection: true,
         reconnectionDelay: 1000,
@@ -110,11 +117,6 @@ export function SocketIOProvider({ children }) {
         console.error("❌ Server error:", error);
         setConnectionError(error.message || "Server error occurred");
       });
-
-      // ✅ Ping/Pong for keep-alive
-      socket.on("pong", () => {
-        console.log("🏓 Pong received");
-      });
     } catch (err) {
       console.error("❌ Error creating Socket.IO connection:", err);
       setConnectionError("Failed to establish connection");
@@ -137,81 +139,61 @@ export function SocketIOProvider({ children }) {
   }, [connect]);
 
   // ✅ BACKWARD COMPATIBLE sendMessage - works like old WebSocket
-  const sendMessage = useCallback((messageOrEvent, data) => {
-    if (!socketRef.current?.connected) {
-      console.error("❌ Socket.IO is not connected");
+  const sendMessage = useCallback(
+    (
+      messageOrEvent: string | { type: string; [key: string]: any },
+      data?: any,
+    ): boolean => {
+      if (!socketRef.current?.connected) {
+        console.error("❌ Socket.IO is not connected");
+        return false;
+      }
+
+      // ✅ NEW: If two parameters, use as (eventName, data)
+      if (data !== undefined) {
+        socketRef.current.emit(messageOrEvent as string, data);
+        return true;
+      }
+
+      // ✅ OLD: If one parameter (object with type field), extract type and emit
+      if (typeof messageOrEvent === "object" && messageOrEvent.type) {
+        const { type, ...payload } = messageOrEvent;
+        socketRef.current.emit(type, payload);
+        return true;
+      }
+
+      // Fallback: just emit the message as-is
+      console.warn("⚠️ Unexpected sendMessage format:", messageOrEvent);
       return false;
-    }
-
-    // ✅ NEW: If two parameters, use as (eventName, data)
-    if (data !== undefined) {
-      socketRef.current.emit(messageOrEvent, data);
-      return true;
-    }
-
-    // ✅ OLD: If one parameter (object with type field), extract type and emit
-    if (typeof messageOrEvent === "object" && messageOrEvent.type) {
-      const { type, ...payload } = messageOrEvent;
-      socketRef.current.emit(type, payload);
-      return true;
-    }
-
-    // Fallback: just emit the message as-is
-    console.warn("⚠️ Unexpected sendMessage format:", messageOrEvent);
-    return false;
-  }, []);
-
-  // ✅ Specific event emitters for your use cases
-  const feedNow = useCallback(
-    (horseId, amountKg) => {
-      return sendMessage("FEED_NOW", { horseId, amountKg });
     },
-    [sendMessage],
-  );
-
-  const startStream = useCallback(
-    (horseId) => {
-      return sendMessage("START_STREAM", { horseId });
-    },
-    [sendMessage],
+    [],
   );
 
   // ✅ Generic event listener
-  const on = useCallback((eventName, callback) => {
-    if (!socketRef.current) return;
-    socketRef.current.on(eventName, callback);
+  const on = useCallback(
+    <K extends keyof ServerToClientEvents>(
+      eventName: K,
+      callback: ServerToClientEvents[K],
+    ): (() => void) | undefined => {
+      if (!socketRef.current) return;
+      socketRef.current.on(eventName as any, callback as any);
 
-    return () => {
-      socketRef.current?.off(eventName, callback);
-    };
-  }, []);
-
-  // ✅ Remove event listener
-  const off = useCallback((eventName, callback) => {
-    if (!socketRef.current) return;
-    socketRef.current.off(eventName, callback);
-  }, []);
-
-  // ✅ Listen to specific events
-  const onFeedingStatus = useCallback(
-    (callback) => {
-      return on("FEEDING_STATUS", callback);
+      return () => {
+        socketRef.current?.off(eventName as any, callback as any);
+      };
     },
-    [on],
+    [],
   );
 
-  const onStreamStatus = useCallback(
-    (callback) => {
-      return on("STREAM_STATUS", callback);
+  const off = useCallback(
+    <K extends keyof ServerToClientEvents>(
+      eventName: K,
+      callback: ServerToClientEvents[K],
+    ): void => {
+      if (!socketRef.current) return;
+      socketRef.current.off(eventName as any, callback as any);
     },
-    [on],
-  );
-
-  const onBroadcast = useCallback(
-    (callback) => {
-      return on("BROADCAST", callback);
-    },
-    [on],
+    [],
   );
 
   // ✅ Manual reconnection
@@ -230,7 +212,10 @@ export function SocketIOProvider({ children }) {
   }, [connect]);
 
   // ✅ Get socket instance (for advanced usage)
-  const getSocket = useCallback(() => socketRef.current, []);
+  const getSocket = useCallback(
+    (): TypedSocket | null => socketRef.current,
+    [],
+  );
 
   // ✅ Disconnect manually
   const disconnect = useCallback(() => {
@@ -239,26 +224,16 @@ export function SocketIOProvider({ children }) {
     }
   }, []);
 
-  const value = useMemo(
+  const value = useMemo<SocketIOContextValue>(
     () => ({
-      // ✅ Same API as WebSocket provider
       isConnected,
       connectionError,
       sendMessage,
       reconnect,
       getSocket,
-
-      // ✅ Additional Socket.IO specific methods
       disconnect,
       on,
       off,
-
-      // ✅ Convenience methods for your specific events
-      feedNow,
-      startStream,
-      onFeedingStatus,
-      onStreamStatus,
-      onBroadcast,
     }),
     [
       isConnected,
@@ -269,11 +244,6 @@ export function SocketIOProvider({ children }) {
       disconnect,
       on,
       off,
-      feedNow,
-      startStream,
-      onFeedingStatus,
-      onStreamStatus,
-      onBroadcast,
     ],
   );
 
@@ -284,7 +254,7 @@ export function SocketIOProvider({ children }) {
   );
 }
 
-export function useSocketIO() {
+export function useSocketIO(): SocketIOContextValue {
   const context = useContext(SocketIOContext);
   if (!context) {
     throw new Error("useSocketIO must be used within a SocketIOProvider");
@@ -295,3 +265,11 @@ export function useSocketIO() {
 // ✅ Backward compatibility alias
 export const useWebSocket = useSocketIO;
 export const WebSocketProvider = SocketIOProvider;
+
+// ✅ Export types for consumers
+export type {
+  ServerToClientEvents,
+  ClientToServerEvents,
+  TypedSocket,
+  SocketIOContextValue,
+};

@@ -1,0 +1,62 @@
+{
+  "compilerOptions": {
+    /* ===============================
+       File Layout
+    =============================== */
+    "rootDir": "./src",
+
+    /* ===============================
+       Environment Settings
+    =============================== */
+    "target": "ES2020",
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+
+    /* ===============================
+       React
+    =============================== */
+    "jsx": "react-jsx",
+
+    /* ===============================
+       JS → TS Migration Support
+    =============================== */
+    "allowJs": true,
+    "checkJs": false,
+
+    /* ===============================
+       Type Checking
+    =============================== */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    // "exactOptionalPropertyTypes": true,
+
+    /* ===============================
+       Build Behavior
+    =============================== */
+    "noEmit": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+
+    /* ===============================
+       Imports & Interop
+    =============================== */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    /* ===============================
+       Path Aliases (shadcn friendly)
+    =============================== */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+
+  /* ===============================
+     Tell TS where your code is
+  =============================== */
+  "include": ["src"],
+
+  "exclude": ["node_modules", "dist"]
+}

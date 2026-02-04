@@ -1,9 +1,10 @@
 // api/auth.js
-import { API_BASE } from "../../constants";
+import { API_BASE } from "@/constants";
+import { ApiRequestOptions } from "@/types.js";
 
 // Helper: Make authenticated request
-async function apiRequest(url, options = {}) {
-  const config = {
+async function apiRequest(url: string, options: ApiRequestOptions = {}) {
+  const config: RequestInit = {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
@@ -26,7 +27,12 @@ async function apiRequest(url, options = {}) {
 }
 
 // 1. SIGNUP
-export async function signup(userData) {
+export async function signup(userData: {
+  name: string;
+  email: string;
+  password: string;
+  passwordConfirm: string;
+}) {
   const response = await fetch(`${API_BASE}/auth/signup`, {
     method: "POST",
     credentials: "include",
@@ -43,7 +49,7 @@ export async function signup(userData) {
 }
 
 // 2. LOGIN
-export async function login(email, password) {
+export async function login(email: string, password: string) {
   const response = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     credentials: "include",
@@ -65,7 +71,7 @@ export async function getCurrentUser() {
     const response = await apiRequest("/auth/me");
     const data = await response.json();
     return data.data.user;
-  } catch (error) {
+  } catch (error: any) {
     if (
       error.message.includes("401") ||
       error.message.includes("Authentication")
@@ -91,14 +97,14 @@ export async function logout() {
 }
 
 // 5. UPDATE PASSWORD
-export async function updatePassword(currentPassword, newPassword) {
+export async function updatePassword(updateData: {
+  currentPassword: string;
+  newPassword: string;
+  passwordConfirm: string;
+}) {
   const response = await apiRequest("/auth/updateMyPassword", {
     method: "POST",
-    body: JSON.stringify({
-      currentPassword,
-      newPassword,
-      passwordConfirm: newPassword, // Usually required
-    }),
+    body: JSON.stringify(updateData),
   });
 
   return response.json();

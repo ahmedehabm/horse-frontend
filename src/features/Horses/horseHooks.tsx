@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useSearchParams } from "react-router-dom";
-import { getMyHorses } from "../../services/apiHorse";
-import { LIMIT_RES } from "../../../constants";
+import { getActiveFeedingStatus, getMyHorses } from "../../services/apiHorse";
+import { LIMIT_RES } from "@/constants";
+import { FeedingStatusPayload } from "@/types";
 
 export function useGetHorsesUser() {
   const [searchParams] = useSearchParams();

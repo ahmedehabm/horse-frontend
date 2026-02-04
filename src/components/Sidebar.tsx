@@ -8,15 +8,21 @@ import {
 } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
 import { useLogout, useSession } from "../features/Auth/authHooks";
+import { Dispatch, SetStateAction } from "react";
+import { useWebSocket } from "./WebSocketContext";
 
 export default function Sidebar({
   sidebarOpen,
   setSidebarOpen,
   role = "USER",
+}: {
+  sidebarOpen: Boolean;
+  setSidebarOpen: Dispatch<SetStateAction<boolean>>;
+  role: "USER" | "ADMIN";
 }) {
   const { user } = useSession();
   const { logout, isPending } = useLogout();
-
+  const { sendMessage, getSocket } = useWebSocket();
   // Role-based navigation links
   const navLinks =
     role === "ADMIN"
@@ -43,12 +49,27 @@ export default function Sidebar({
             icon: FaTachometerAlt,
             label: "Dashboard",
           },
+          {
+            to: "/user/feeders",
+            icon: FaTachometerAlt,
+            label: "Feeders",
+          },
         ];
 
-  function handleLogout() {
-    logout();
-  }
+  async function handleLogout() {
+    const socket = getSocket();
 
+    try {
+      if (socket?.connected) {
+        // Wait up to 800ms for server to confirm it processed LOGOUT
+        await socket.timeout(800).emitWithAck("LOGOUT");
+      }
+    } catch {
+      // ignore: fallback will be disconnecting path (5s grace)
+    } finally {
+      logout(); // now do your react-query logout + navigation
+    }
+  }
   const isAdmin = role === "ADMIN";
 
   return (

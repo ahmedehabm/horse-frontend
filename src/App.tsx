@@ -47,6 +47,7 @@ function App() {
             }
           >
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="feeders" element={<>feeders</>} />
           </Route>
 
           {/*  */}

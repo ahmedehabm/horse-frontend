@@ -3,19 +3,26 @@ import { useTransition } from "react";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2";
 import { useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { LIMIT_RES } from "../../constants";
+import { LIMIT_RES } from "@/constants";
 
-function Pagination({ count, totalPages }) {
+function Pagination({
+  count,
+  totalPages,
+}: {
+  count: number;
+  totalPages: number;
+}) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const currentPage = searchParams.get("page") ? +searchParams.get("page") : 1;
+  const currentPage = Number(searchParams.get("page") ?? 1);
+
   const pageCount = totalPages || Math.ceil(count / LIMIT_RES);
 
   function nextPage() {
     startTransition(() => {
       const next = currentPage + 1;
-      searchParams.set("page", next);
+      searchParams.set("page", next.toString());
       setSearchParams(searchParams);
     });
   }
@@ -23,7 +30,7 @@ function Pagination({ count, totalPages }) {
   function prevPage() {
     startTransition(() => {
       const prev = currentPage - 1;
-      searchParams.set("page", prev);
+      searchParams.set("page", prev.toString());
       setSearchParams(searchParams);
     });
   }
