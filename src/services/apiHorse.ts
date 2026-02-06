@@ -1,5 +1,9 @@
 import { API_BASE } from "@/constants";
-import { ApiRequestOptions, FeedingStatusPayload } from "@/types";
+import {
+  ApiRequestOptions,
+  FeedingStatusPayload,
+  HorsesStatsResponse,
+} from "@/types";
 
 export async function apiRequest<T = any>(
   url: string,
@@ -59,17 +63,21 @@ export async function getAllHorses(params: Record<string, any> = {}) {
  * Get the current/active feeding status for a horse
  * Returns null if no active feeding in progress
  */
-export async function getActiveFeedingStatus(
-  horseId: string,
-): Promise<FeedingStatusPayload | null> {
-  console.log("status");
+
+export async function getHorsesStats() {
+  console.log("SSSSTTTAAATS");
   try {
-    return await apiRequest<FeedingStatusPayload>(
-      `/horses/${horseId}/feeding/active`,
-    );
+    const response = await apiRequest<{
+      status: string;
+      data: HorsesStatsResponse;
+    }>(`/horses/stats`);
+    return response.data;
   } catch (error) {
-    // No active feeding found
-    console.log(`No active feeding for horse ${horseId}`);
-    return null;
+    console.log("Failed to fetch horses stats:", error);
+    // Return empty state on error
+    return {
+      activeFeedings: [],
+      activeStream: null,
+    };
   }
 }

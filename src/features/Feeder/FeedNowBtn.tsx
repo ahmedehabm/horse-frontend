@@ -2,9 +2,9 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { FaUtensils } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useWebSocketMessage } from "@/components/hooks/useWebSocketMessage";
-import { useGetActiveFeedingStatus } from "./feederHooks";
 import { FeedingStatusPayload, Horse } from "@/types";
 import FeedDialog from "../Feeder/FeedDialog";
+import { useGetActiveFeedingStatus } from "../Horses/horseHooks";
 
 export default function FeedNowBtn({
   horse,
@@ -18,14 +18,14 @@ export default function FeedNowBtn({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   /**
-   * ✅ Feeding lock
+   *  Feeding lock
    */
   const isFeedingInProgress =
     activeFeedingStatus &&
     ["PENDING", "STARTED", "RUNNING"].includes(activeFeedingStatus.status);
 
   /**
-   * ✅ WebSocket listener — feedback only
+   *  WebSocket listener — feedback only
    */
   const handleFeedingStatus = useCallback(
     (data: FeedingStatusPayload) => {
@@ -51,7 +51,7 @@ export default function FeedNowBtn({
   ]);
 
   /**
-   * ✅ Open dialog only if allowed
+   *  Open dialog only if allowed
    */
   const handleOpenDialog = useCallback(() => {
     if (!horse.feeder) {

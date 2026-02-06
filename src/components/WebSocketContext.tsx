@@ -16,8 +16,6 @@ import {
 } from "react";
 import { io } from "socket.io-client";
 
-const SOCKET_URL = "http://localhost:3000";
-
 const SocketIOContext = createContext<SocketIOContextValue | null>(null);
 
 export function SocketIOProvider({ children }: { children: ReactNode }) {

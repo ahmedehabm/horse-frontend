@@ -25,6 +25,10 @@ export interface Horse {
     feederType: "MANUAL" | "SCHEDULED";
     thingName: string;
   } | null;
+  camera?: {
+    id: string;
+    thingName: string;
+  } | null;
 }
 
 /*
@@ -56,7 +60,6 @@ export type FeedingStatusPayload = {
   horseId: string;
   status: string;
   feedingId: string;
-  deviceName?: string;
   errorMessage?: string;
 };
 
@@ -66,7 +69,6 @@ export type FeedingStatusPayload = {
 export type StreamStatusPayload = {
   horseId: string;
   status: string;
-  deviceName?: string;
   streamUrl: string;
   errorMessage?: string;
 };
@@ -84,7 +86,7 @@ export type BroadcastPayload =
   | ({ type: "FEEDING_STATUS" } & FeedingStatusPayload)
   | ({ type: "STREAM_STATUS" } & StreamStatusPayload);
 
-// ✅ Socket.IO Event Types
+//  Socket.IO Event Types
 export interface ServerToClientEvents {
   connect: () => void;
   disconnect: (reason: string) => void;
@@ -104,10 +106,10 @@ export interface ClientToServerEvents {
   [key: string]: (data?: any) => void;
 }
 
-// ✅ Typed Socket.IO client
+//  Typed Socket.IO client
 export type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
-// ✅ Context value type
+//  Context value type
 export interface SocketIOContextValue {
   isConnected: boolean;
   connectionError: string | null;
@@ -126,4 +128,20 @@ export interface SocketIOContextValue {
     eventName: K,
     callback: ServerToClientEvents[K],
   ) => void;
+}
+
+export interface ActiveFeedingStats {
+  horseId: string;
+  feedingId: string;
+  status: string;
+}
+
+export interface ActiveStreamStats {
+  horseId: string;
+  status: "STARTED" | "PENDING" | "IDLE";
+}
+
+export interface HorsesStatsResponse {
+  activeFeedings: ActiveFeedingStats[];
+  activeStream: ActiveStreamStats | null;
 }

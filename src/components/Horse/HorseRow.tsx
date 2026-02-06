@@ -1,6 +1,6 @@
 import { FaVideo, FaUtensils, FaClock } from "react-icons/fa";
 import { Horse } from "@/types";
-import StreamBtn from "@/features/Horses/StreamBtn";
+import StreamBtn from "@/features/Stream/StreamBtn";
 import FeederWeight from "@/features/Feeder/FeederWeight";
 import FeedNowBtn from "@/features/Feeder/FeedNowBtn";
 import FeedingBar from "@/features/Feeder/FeedingBar";

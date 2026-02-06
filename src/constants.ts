@@ -1,3 +1,5 @@
-// export const API_BASE = "http://localhost:3000/api/v1";
+export const API_BASE = "http://localhost:3000/api/v1";
 
 export const LIMIT_RES = 3;
+
+export const SOCKET_URL = "http://localhost:3000";

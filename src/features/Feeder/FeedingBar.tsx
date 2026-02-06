@@ -3,8 +3,8 @@ import { FaCheckCircle, FaSpinner } from "react-icons/fa";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWebSocketMessage } from "../../components/hooks/useWebSocketMessage";
 import { Progress } from "@/components/ui/progress";
-import { useGetActiveFeedingStatus } from "./feederHooks";
-import { FeedingStatusPayload } from "@/types";
+import { FeedingStatusPayload, HorsesStatsResponse } from "@/types";
+import { useGetActiveFeedingStatus } from "../Horses/horseHooks";
 
 interface FeedingBarProps {
   horseId: string;
@@ -39,12 +39,65 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
       }
 
       // ✅ Update React Query cache directly
-      queryClient.setQueryData(["active-feeding", horseId], data);
+      queryClient.setQueryData<HorsesStatsResponse>(
+        ["horses-stats"], // ✅ Fixed: no pagination
+        (oldData) => {
+          if (!oldData) {
+            return {
+              activeFeedings: [
+                {
+                  horseId: data.horseId,
+                  feedingId: data.feedingId,
+                  status: data.status,
+                },
+              ],
+              activeStream: null,
+            };
+          }
 
-      // ✅ Clear cache after completion / failure
+          const existingIndex = oldData.activeFeedings.findIndex(
+            (f) => f.horseId === horseId,
+          );
+
+          const updatedFeedings = [...oldData.activeFeedings];
+
+          if (existingIndex >= 0) {
+            updatedFeedings[existingIndex] = {
+              horseId: data.horseId,
+              feedingId: data.feedingId,
+              status: data.status,
+            };
+          } else {
+            updatedFeedings.push({
+              horseId: data.horseId,
+              feedingId: data.feedingId,
+              status: data.status,
+            });
+          }
+
+          return {
+            ...oldData,
+            activeFeedings: updatedFeedings,
+          };
+        },
+      );
+
+      // ✅ Clear from cache after completion / failure
       if (data.status === "COMPLETED" || data.status === "FAILED") {
         timeoutRef.current = setTimeout(() => {
-          queryClient.setQueryData(["active-feeding", horseId], null);
+          queryClient.setQueryData<HorsesStatsResponse>(
+            ["horses-stats"], // ✅ Fixed: no pagination
+            (oldData) => {
+              if (!oldData) return oldData;
+
+              return {
+                ...oldData,
+                activeFeedings: oldData.activeFeedings.filter(
+                  (f) => f.horseId !== horseId,
+                ),
+              };
+            },
+          );
         }, 3000);
       }
     },
@@ -55,7 +108,6 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
     handleFeedingStatus,
   ]);
 
-  // ✅ Cleanup timers only (not syncing)
   const feeding = activeFeedingStatus;
 
   if (isFetching || !feeding) return null;
@@ -117,11 +169,6 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
               {statusDisplay.text}
             </span>
           </div>
-          {feeding.deviceName && (
-            <span className="text-xs text-gray-500 font-medium">
-              {feeding.deviceName}
-            </span>
-          )}
         </div>
 
         <div className="space-y-1">
@@ -140,11 +187,6 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
           />
           <div className="flex items-center justify-between text-xs">
             <span className={statusDisplay.color}>{progress}% complete</span>
-            {feeding.feedingId && (
-              <span className="text-gray-400 font-mono">
-                ID: {feeding.feedingId.slice(-8)}
-              </span>
-            )}
           </div>
         </div>
       </div>
