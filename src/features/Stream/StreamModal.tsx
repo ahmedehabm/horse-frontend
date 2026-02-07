@@ -1,12 +1,6 @@
 // features/Stream/StreamModal.tsx
 import { useCallback, useEffect, useState } from "react";
-import {
-  FaStop,
-  FaExpand,
-  FaCompress,
-  FaVolumeUp,
-  FaVolumeMute,
-} from "react-icons/fa";
+import { FaStop, FaExpand, FaCompress } from "react-icons/fa";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Horse } from "@/types";
+import { SOCKET_URL } from "@/constants";
 
 interface StreamModalProps {
   horse: Horse;
@@ -33,9 +28,9 @@ export default function StreamModal({
   onStopStream,
 }: StreamModalProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [streamError, setStreamError] = useState(false);
 
-  const streamUrl = `/stream/${token}`;
+  const streamUrl = `${SOCKET_URL}/stream/${token}`;
 
   const toggleFullscreen = useCallback(() => {
     const videoContainer = document.getElementById("stream-container");
@@ -58,6 +53,13 @@ export default function StreamModal({
     return () =>
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
+
+  // Reset error state when modal opens
+  useEffect(() => {
+    if (open) {
+      setStreamError(false);
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -89,52 +91,63 @@ export default function StreamModal({
           id="stream-container"
           className="relative bg-black aspect-video w-full"
         >
-          <iframe
-            src={streamUrl}
-            className="w-full h-full"
-            allow="autoplay; fullscreen"
-            title={`${horse.name} Live Stream`}
-          />
-
-          {/* Video Controls Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+          {/*  MJPEG Stream using <img> tag */}
+          {streamError ? (
+            <div className="flex items-center justify-center h-full text-white">
+              <div className="text-center">
+                <p className="text-xl mb-2">⚠️ Stream Unavailable</p>
+                <p className="text-sm text-white/60">Unable to load stream</p>
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-white/20"
-                  onClick={() => setIsMuted(!isMuted)}
+                  variant="outline"
+                  size="sm"
+                  className="mt-4"
+                  onClick={() => setStreamError(false)}
                 >
-                  {isMuted ? (
-                    <FaVolumeMute className="h-4 w-4" />
-                  ) : (
-                    <FaVolumeUp className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-
-              <div className="flex items-center gap-2 text-white/80 text-sm">
-                <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                <span>LIVE</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-white/20"
-                  onClick={toggleFullscreen}
-                >
-                  {isFullscreen ? (
-                    <FaCompress className="h-4 w-4" />
-                  ) : (
-                    <FaExpand className="h-4 w-4" />
-                  )}
+                  Retry
                 </Button>
               </div>
             </div>
-          </div>
+          ) : (
+            <img
+              src={streamUrl}
+              alt={`${horse.name} Live Stream`}
+              className="w-full h-full object-contain"
+              onError={() => {
+                console.error("Stream error for:", streamUrl);
+                setStreamError(true);
+              }}
+              onLoad={() => {
+                console.log("Stream loaded:", streamUrl);
+              }}
+            />
+          )}
+
+          {/* Video Controls Overlay */}
+          {!streamError && (
+            <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-white/80 text-sm">
+                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  <span>LIVE</span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-white hover:bg-white/20"
+                    onClick={toggleFullscreen}
+                  >
+                    {isFullscreen ? (
+                      <FaCompress className="h-4 w-4" />
+                    ) : (
+                      <FaExpand className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Actions */}

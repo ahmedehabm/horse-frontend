@@ -1,5 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "react-hot-toast";
 import Login from "./pages/LoginPage";
@@ -53,7 +55,7 @@ function App() {
           {/*  */}
         </Routes>
       </BrowserRouter>
-
+      <ReactQueryDevtools initialIsOpen={false} position="bottom" />
       <Toaster
         position="bottom-right"
         gutter={16}
