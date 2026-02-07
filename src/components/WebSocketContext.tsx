@@ -1,3 +1,4 @@
+import { SOCKET_URL } from "@/constants";
 import {
   ServerToClientEvents,
   SocketIOContextValue,

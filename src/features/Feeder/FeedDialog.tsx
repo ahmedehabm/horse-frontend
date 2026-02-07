@@ -24,6 +24,7 @@ export default function FeedDialog({
   horse,
 }: FeedAmountDialogProps) {
   const { isConnected, sendMessage } = useWebSocket();
+
   const [amount, setAmount] = useState<string>("2.5");
 
   const handleSubmit = useCallback(() => {
