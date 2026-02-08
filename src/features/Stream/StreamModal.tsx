@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Horse } from "@/types";
-import { SOCKET_URL } from "@/constants";
 
 interface StreamModalProps {
   horse: Horse;
@@ -30,7 +29,7 @@ export default function StreamModal({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [streamError, setStreamError] = useState(false);
 
-  const streamUrl = `${SOCKET_URL}/stream/${token}`;
+  const streamUrl = `/stream/${token}`;
 
   const toggleFullscreen = useCallback(() => {
     const videoContainer = document.getElementById("stream-container");

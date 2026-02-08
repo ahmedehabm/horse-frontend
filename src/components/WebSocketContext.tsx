@@ -56,21 +56,21 @@ export function SocketIOProvider({ children }: { children: ReactNode }) {
 
       socketRef.current = socket;
 
-      // ✅ Connection successful
+      //  Connection successful
       socket.on("connect", () => {
-        console.log("✅ Socket.IO connected! Socket ID:", socket.id);
+        console.log("✅");
         setIsConnected(true);
         setConnectionError(null);
       });
 
-      // ✅ Authentication success event (from your backend)
+      // Authentication success event (from your backend)
       socket.on("AUTH_SUCCESS", (data) => {
-        console.log("✅ Authentication successful:", data);
+        console.log("✅");
       });
 
-      // ✅ Connection error
+      //  Connection error
       socket.on("connect_error", (error) => {
-        console.error("❌ Socket.IO connection error:", error.message);
+        // console.error("❌ Socket.IO connection error:", error.message);
         setConnectionError(`Connection error: ${error.message}`);
         setIsConnected(false);
       });
