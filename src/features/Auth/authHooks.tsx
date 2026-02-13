@@ -16,13 +16,13 @@ import { User } from "@/types";
 // ==============================
 
 export interface LoginInput {
-  email: string;
+  username: string;
   password: string;
 }
 
 export interface SignupInput {
   name: string;
-  email: string;
+  username: string;
   password: string;
   passwordConfirm: string;
 }
@@ -38,7 +38,7 @@ export function useLogin() {
     isPending,
     error,
   } = useMutation<User, Error, LoginInput>({
-    mutationFn: ({ email, password }) => loginApi(email, password),
+    mutationFn: ({ username, password }) => loginApi(username, password),
     onSuccess: () => {
       toast.success("Logged in successfully");
       // Invalidate + refetch user session
@@ -116,23 +116,18 @@ export function useLogout() {
 // ==============================
 export function useSignup() {
   const queryClient = useQueryClient();
-  // const navigate = useNavigate();
-
   const {
     mutate: signUp,
     isPending,
     error,
-  } = useMutation<
-    User, // response
-    Error, // error
-    SignupInput // variables
-  >({
-    mutationFn: ({ name, email, password, passwordConfirm }) =>
-      signUpApi({ name, email, password, passwordConfirm }),
+  } = useMutation<User, Error, SignupInput>({
+    mutationFn: ({ name, username, password, passwordConfirm }) =>
+      signUpApi({ name, username, password, passwordConfirm }),
     onSuccess: () => {
       toast.success("Account successfully created! Please log in.");
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+
       queryClient.clear();
-      // navigate("/login", { replace: true });
     },
     onError: (err) => {
       toast.error(err.message || "Signup failed");

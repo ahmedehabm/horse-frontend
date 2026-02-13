@@ -29,7 +29,7 @@ async function apiRequest(url: string, options: ApiRequestOptions = {}) {
 // 1. SIGNUP
 export async function signup(userData: {
   name: string;
-  email: string;
+  username: string;
   password: string;
   passwordConfirm: string;
 }) {
@@ -49,12 +49,12 @@ export async function signup(userData: {
 }
 
 // 2. LOGIN
-export async function login(email: string, password: string) {
+export async function login(username: string, password: string) {
   const response = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ username, password }),
   });
 
   if (!response.ok) {

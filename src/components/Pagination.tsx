@@ -3,21 +3,24 @@ import { useTransition } from "react";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2";
 import { useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { LIMIT_RES } from "@/constants";
 
 function Pagination({
-  count,
-  totalPages,
+  label,
+  count = 0,
+  totalPages = 0,
+  limit,
 }: {
+  label: string;
   count: number;
   totalPages: number;
+  limit: number;
 }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const currentPage = Number(searchParams.get("page") ?? 1);
 
-  const pageCount = totalPages || Math.ceil(count / LIMIT_RES);
+  const pageCount = totalPages || Math.ceil(count / limit);
 
   function nextPage() {
     startTransition(() => {
@@ -43,17 +46,17 @@ function Pagination({
       <p className="text-sm text-green-800 font-medium">
         Showing{" "}
         <span className="font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
-          {(currentPage - 1) * LIMIT_RES + 1}
+          {(currentPage - 1) * limit + 1}
         </span>{" "}
         to{" "}
         <span className="font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
-          {Math.min(currentPage * LIMIT_RES, count)}
+          {Math.min(currentPage * limit, count)}
         </span>{" "}
         of{" "}
         <span className="font-bold text-green-700">
           {count.toLocaleString()}
         </span>{" "}
-        horses
+        {label}
       </p>
 
       {/* Pagination Controls */}

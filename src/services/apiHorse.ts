@@ -13,12 +13,12 @@ export async function apiRequest<T = any>(
     method: options.method || "GET",
     credentials: "include",
     headers: {
-      "Content-Type": "application/json",
       ...options.headers,
     },
     ...options,
   };
 
+  // ✅ Fixed - added parentheses
   const response = await fetch(`${API_BASE}${url}`, config);
 
   if (!response.ok) {
@@ -29,7 +29,6 @@ export async function apiRequest<T = any>(
 
   return response.json() as Promise<T>;
 }
-
 // ==============================
 // Fetch user's horses
 // ==============================
@@ -80,4 +79,39 @@ export async function getHorsesStats() {
       activeStream: null,
     };
   }
+}
+
+// export async function createHorse(formData: any) {
+//   console.log(formData);
+//   const response = await apiRequest("/horses", {
+//     method: "POST",
+//     body: JSON.stringify(formData),
+//   });
+
+//   if (!response.ok) {
+//     const error = await response.json();
+//     throw new Error(error.message || "Failed to create horse");
+//   }
+
+//   return response.json();
+// }
+
+export async function createHorse(payload: {
+  name: string;
+  breed: string;
+  age: number;
+  location: string;
+  ownerId: string;
+  feederId?: string;
+  cameraId?: string;
+  image?: string; // will be a file
+}) {
+  console.log(JSON.stringify(payload));
+  return apiRequest("/horses", {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 }

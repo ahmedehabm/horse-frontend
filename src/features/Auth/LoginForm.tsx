@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useLogin } from "./authHooks";
 import { Loader2, Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState("john@example.com");
+  const [username, setUsername] = useState("john@example.com");
 
   const [password, setPassword] = useState("password123");
 
@@ -14,8 +13,8 @@ export default function LoginForm() {
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!email || !password) return;
-    login({ email, password });
+    if (!username || !password) return;
+    login({ username, password });
   }
 
   return (
@@ -57,22 +56,22 @@ export default function LoginForm() {
           )}
 
           <form onSubmit={handleSubmit}>
-            {/* Email Field */}
+            {/* username Field */}
             <div className="mb-4">
               <label
-                htmlFor="email"
+                htmlFor="username"
                 className="block text-gray-700 text-sm font-medium mb-2"
               >
-                Email Address
+                Username
               </label>
               <input
-                type="email"
-                id="email"
+                type="username"
+                id="username"
                 autoComplete="username"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                placeholder="your@email.com"
+                placeholder="your@username.com"
                 disabled={isPending}
               />
             </div>
@@ -124,17 +123,6 @@ export default function LoginForm() {
               )}
             </button>
           </form>
-
-          {/* Link to Signup */}
-          <p className="text-center mt-6 text-gray-600 text-sm">
-            Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className="text-green-600 font-medium hover:underline hover:text-green-700 transition-colors"
-            >
-              Sign Up
-            </Link>
-          </p>
         </div>
       </div>
     </div>

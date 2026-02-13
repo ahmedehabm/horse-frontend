@@ -28,7 +28,6 @@ export default function StreamModal({
 }: StreamModalProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [streamError, setStreamError] = useState(false);
-
   const streamUrl = `/stream/${token}`;
 
   const toggleFullscreen = useCallback(() => {

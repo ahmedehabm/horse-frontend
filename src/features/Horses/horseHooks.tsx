@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useSearchParams } from "react-router-dom";
-import { getHorsesStats, getMyHorses } from "../../services/apiHorse";
+import {
+  createHorse as createHorseApi,
+  getHorsesStats,
+  getMyHorses,
+} from "../../services/apiHorse";
 import { LIMIT_RES } from "@/constants";
 import { HorsesStatsResponse } from "@/types";
 
@@ -62,6 +66,32 @@ export function useGetActiveStreamStatus() {
   return {
     activeStream,
     isFetching,
+    error,
+  };
+}
+
+export function useCreateHorse() {
+  const queryClient = useQueryClient();
+
+  const {
+    mutate: createHorse,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: createHorseApi,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["horses"] });
+      queryClient.invalidateQueries({ queryKey: ["device-options"] });
+      toast.success("Horse created successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to create horse");
+    },
+  });
+
+  return {
+    createHorse,
+    isPending,
     error,
   };
 }

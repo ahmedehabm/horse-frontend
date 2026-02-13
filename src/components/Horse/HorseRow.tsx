@@ -1,9 +1,9 @@
 import { FaVideo, FaUtensils, FaClock } from "react-icons/fa";
 import { Horse } from "@/types";
 import StreamBtn from "@/features/Stream/StreamBtn";
-import FeederWeight from "@/features/Feeder/FeederWeight";
-import FeedNowBtn from "@/features/Feeder/FeedNowBtn";
-import FeedingBar from "@/features/Feeder/FeedingBar";
+import FeederWeight from "@/features/Feeding/FeederWeight";
+import FeedNowBtn from "@/features/Feeding/FeedNowBtn";
+import FeedingBar from "@/features/Feeding/FeedingBar";
 
 export default function HorseRow({ horse }: { horse: Horse }) {
   const feedsToday = 0;
@@ -70,7 +70,7 @@ export default function HorseRow({ horse }: { horse: Horse }) {
                 <span className="ml-1">feeds today</span>
               </div>
 
-              {/* Live Feeder Weight - ADD THIS */}
+              {/* Live Feeder Weight */}
               <FeederWeight thingName={horse.feeder?.thingName} />
 
               {/* Last Feed Time */}

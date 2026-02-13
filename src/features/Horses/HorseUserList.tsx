@@ -2,6 +2,7 @@ import { useGetHorsesUser } from "./horseHooks";
 import Pagination from "../../components/Pagination";
 import HorseRow from "../../components/Horse/HorseRow";
 import { Horse } from "@/types";
+import { HORSE_USER_RES } from "@/constants";
 // import FeedNowBtn from "./FeedNowBtn";
 
 export default function HorseUserList() {
@@ -25,6 +26,11 @@ export default function HorseUserList() {
 
   return (
     <div className="space-y-4">
+      {/* <img
+        src={`/stream/abc`}
+        alt="Live camera feed"
+        style={{ width: "100%" }}
+      /> */}
       {/* Horses List */}
       <div className="space-y-3">
         {horses.map((horse: Horse) => (
@@ -34,7 +40,12 @@ export default function HorseUserList() {
 
       {/* Pagination */}
       <div className="pt-4">
-        <Pagination count={count} totalPages={totalPages} />
+        <Pagination
+          label="horses"
+          count={count}
+          totalPages={totalPages}
+          limit={HORSE_USER_RES}
+        />
       </div>
     </div>
   );

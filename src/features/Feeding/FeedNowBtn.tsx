@@ -3,7 +3,7 @@ import { FaUtensils } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { useWebSocketMessage } from "@/components/hooks/useWebSocketMessage";
 import { FeedingStatusPayload, Horse } from "@/types";
-import FeedDialog from "../Feeder/FeedDialog";
+import FeedDialog from "./FeedDialog";
 import { useGetActiveFeedingStatus } from "../Horses/horseHooks";
 
 export default function FeedNowBtn({

@@ -5,6 +5,7 @@ import {
   FaHorseHead,
   FaBox,
   FaTachometerAlt,
+  FaUserPlus,
 } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
 import { useLogout, useSession } from "../features/Auth/authHooks";
@@ -22,7 +23,7 @@ export default function Sidebar({
 }) {
   const { user } = useSession();
   const { logout, isPending } = useLogout();
-  const { sendMessage, getSocket } = useWebSocket();
+  const { getSocket } = useWebSocket();
   // Role-based navigation links
   const navLinks =
     role === "ADMIN"
@@ -33,13 +34,18 @@ export default function Sidebar({
             label: "Manage Horses",
           },
           {
-            to: "/admin/feeders",
+            to: "/admin/devices",
             icon: FaBox,
-            label: "Manage Feeders",
+            label: "Manage Devices",
           },
           {
             to: "/admin/users",
             icon: FaUsers,
+            label: "Users",
+          },
+          {
+            to: "/admin/signup",
+            icon: FaUserPlus,
             label: "Signup Users",
           },
         ]
@@ -134,7 +140,7 @@ export default function Sidebar({
                 {user?.name || (isAdmin ? "Super Admin" : "User")}
               </p>
               <p className="text-xs text-gray-600 truncate mt-0.5">
-                {user?.email ||
+                {user?.username ||
                   (isAdmin ? "admin@ostler.com" : "user@ostler.com")}
               </p>
               <span

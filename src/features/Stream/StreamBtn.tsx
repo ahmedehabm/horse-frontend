@@ -274,6 +274,7 @@ export default function StreamBtn({ horse, className = "" }: StreamBtnProps) {
       </div>
 
       {/* Stream Modal */}
+
       {isStreaming && token && (
         <StreamModal
           horse={horse}

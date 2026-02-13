@@ -8,6 +8,9 @@ import Login from "./pages/LoginPage";
 import AppLayout from "./components/AppLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/User/DashBoardPage";
+import Users from "./pages/Admin/Users";
+import Devices from "./pages/Admin/Devices";
+import SignUp from "./pages/Admin/SignUp";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,8 +38,9 @@ function App() {
             }
           >
             <Route path="horses" element={<>horses</>} />
-            <Route path="feeders" element={<h2>feeders</h2>} />
-            <Route path="users" element={<>users</>} />
+            <Route path="devices" element={<Devices />} />
+            <Route path="users" element={<Users />} />
+            <Route path="signup" element={<SignUp />} />
           </Route>
 
           {/* User Routes */}
