@@ -5,67 +5,68 @@ import { useWebSocketMessage } from "@/components/hooks/useWebSocketMessage";
 import { FeedingStatusPayload, Horse } from "@/types";
 import FeedDialog from "./FeedDialog";
 import { useGetActiveFeedingStatus } from "../Horses/horseHooks";
+import { useTranslation } from "react-i18next";
+import { useFeederWeight } from "@/components/hooks/useFeederWeight";
 
 export default function FeedNowBtn({
   horse,
   className = "",
 }: {
   horse: Horse;
-  className: string;
+  className?: string;
 }) {
+  const { t } = useTranslation();
   const { activeFeedingStatus } = useGetActiveFeedingStatus(horse.id);
   const [dialogOpen, setDialogOpen] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  /**
-   *  Feeding lock
-   */
+  // Get current feeder weight
+  const { weight: currentWeight } = useFeederWeight(horse.feeder?.thingName);
+
   const isFeedingInProgress =
     activeFeedingStatus &&
     ["PENDING", "STARTED", "RUNNING"].includes(activeFeedingStatus.status);
 
-  /**
-   *  WebSocket listener — feedback only
-   */
   const handleFeedingStatus = useCallback(
     (data: FeedingStatusPayload) => {
       if (data.horseId !== horse.id) return;
 
       if (data.status === "COMPLETED") {
-        toast.success(`🎉 Feeding ${horse.name} completed successfully!`);
+        toast.success(
+          t("feedNowBtn.feedingCompleted", { horseName: horse.name }),
+        );
       }
 
       if (data.status === "FAILED") {
         toast.error(
-          `❌ Feeding ${horse.name} failed. ${
-            data.errorMessage || "Please try again."
-          }`,
+          t("feedNowBtn.feedingFailed", {
+            horseName: horse.name,
+            errorMessage:
+              data.errorMessage || t("feedNowBtn.feedHorse", { horseName: "" }),
+          }),
         );
       }
     },
-    [horse.id, horse.name],
+    [horse.id, horse.name, t],
   );
 
   useWebSocketMessage("FEEDING_STATUS", handleFeedingStatus, [
     handleFeedingStatus,
   ]);
 
-  /**
-   *  Open dialog only if allowed
-   */
   const handleOpenDialog = useCallback(() => {
     if (!horse.feeder) {
-      toast.error(`${horse.name} has no feeder assigned.`);
+      toast.error(t("feedNowBtn.noFeeder"));
       return;
     }
 
     if (isFeedingInProgress) {
-      toast.error(`🚫 ${horse.name} is already being fed. Please wait.`);
+      toast.error(t("feedNowBtn.feedingInProgress"));
       return;
     }
 
     setDialogOpen(true);
-  }, [horse, isFeedingInProgress]);
+  }, [horse, isFeedingInProgress, t]);
 
   useEffect(() => {
     return () => {
@@ -76,12 +77,9 @@ export default function FeedNowBtn({
   const isDisabled = !horse.feeder || isFeedingInProgress;
 
   const getButtonStyles = () => {
-    if (isFeedingInProgress) {
+    if (isFeedingInProgress)
       return "bg-gray-400 text-gray-700 cursor-not-allowed";
-    }
-    if (!horse.feeder) {
-      return "bg-gray-300 text-gray-500 cursor-not-allowed";
-    }
+    if (!horse.feeder) return "bg-gray-300 text-gray-500 cursor-not-allowed";
     return "bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:shadow-xl";
   };
 
@@ -93,20 +91,25 @@ export default function FeedNowBtn({
         className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl shadow-lg transition-all duration-200 text-sm ${getButtonStyles()} ${className}`}
         title={
           !horse.feeder
-            ? "No feeder assigned"
+            ? t("feedNowBtn.noFeeder")
             : isFeedingInProgress
-              ? "Feeding in progress — please wait"
-              : `Feed ${horse.name}`
+              ? t("feedNowBtn.feedingInProgress")
+              : t("feedNowBtn.feedHorse", { horseName: horse.name })
         }
       >
         <FaUtensils className="text-sm" />
-        <span>{isFeedingInProgress ? "FEEDING…" : "FEED NOW"}</span>
+        <span>
+          {isFeedingInProgress
+            ? t("feedNowBtn.feeding")
+            : t("feedNowBtn.feedNow")}
+        </span>
       </button>
 
       <FeedDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         horse={horse}
+        maxWeight={currentWeight}
       />
     </>
   );

@@ -1,7 +1,7 @@
-// src/components/UsersList.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { MoreVertical } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +9,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -34,10 +33,9 @@ interface User {
 }
 
 export default function UsersList() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { users, count, totalPages, isFetching, error } = useGetUsers();
-
-  console.log(users);
 
   if (error) {
     return (
@@ -50,16 +48,18 @@ export default function UsersList() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle>Users</CardTitle>
+        <CardTitle>{t("users.title")}</CardTitle>
       </CardHeader>
 
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[280px]">Name</TableHead>
-              <TableHead>Username</TableHead>
-              <TableHead className="w-[100px] text-right">Actions</TableHead>
+              <TableHead className="w-[280px]">{t("users.name")}</TableHead>
+              <TableHead>{t("auth.username")}</TableHead>
+              <TableHead className="w-[100px] text-right">
+                {t("users.actions")}
+              </TableHead>
             </TableRow>
           </TableHeader>
 
@@ -84,15 +84,16 @@ export default function UsersList() {
                   colSpan={3}
                   className="text-center text-muted-foreground"
                 >
-                  No users found.
+                  {t("users.noUsersFound")}
                 </TableCell>
               </TableRow>
             ) : (
               users.map((u: User) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-medium">
-                    {u.name || "Unnamed User"}
+                    {u.name || t("users.unnamedUser")}
                   </TableCell>
+
                   <TableCell className="text-muted-foreground">
                     {u.username}
                   </TableCell>
@@ -105,14 +106,13 @@ export default function UsersList() {
                             variant="outline"
                             size="sm"
                             className="h-8 w-8 p-0"
-                            aria-label="Open user actions"
+                            aria-label={t("users.actions")}
                           >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
 
                         <DropdownMenuContent align="end" className="w-56">
-                          {/* Create Horse (opens dialog) */}
                           <CreateHorseDialog
                             ownerId={u.id}
                             ownerName={u.name ?? undefined}
@@ -125,7 +125,7 @@ export default function UsersList() {
                             }
                             className="cursor-pointer"
                           >
-                            Update user details
+                            {t("users.updateUser")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -137,10 +137,9 @@ export default function UsersList() {
           </TableBody>
         </Table>
 
-        {/*  Pagination  */}
         <div className="pt-4">
           <Pagination
-            label="users"
+            label={t("pagination.users")}
             count={count}
             totalPages={totalPages}
             limit={LIMIT_RES}

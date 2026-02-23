@@ -1,16 +1,10 @@
-// src/components/SignupForm.tsx
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,19 +16,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import z from "zod";
-import { userSignupSchema } from "@/lib/validators";
+import { getUserSignupSchema } from "@/lib/validators";
 import { useSignup } from "./authHooks";
 
-type SignupFormValues = z.infer<typeof userSignupSchema>;
+type SignupFormValues = z.infer<ReturnType<typeof getUserSignupSchema>>;
 
 export default function SignupForm() {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
   const { signUp, isPending } = useSignup();
 
   const form = useForm<SignupFormValues>({
-    resolver: zodResolver(userSignupSchema),
+    resolver: zodResolver(getUserSignupSchema()),
     defaultValues: {
       name: "",
       username: "",
@@ -54,8 +49,7 @@ export default function SignupForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create New User</CardTitle>
-        <CardDescription>Add a new user account to the system</CardDescription>
+        <CardTitle>{t("users.signupUsers")}</CardTitle>
       </CardHeader>
 
       <CardContent>
@@ -67,9 +61,9 @@ export default function SignupForm() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t("common.name")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -83,10 +77,10 @@ export default function SignupForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Username ( Must be unique for each user )
+                    {t("auth.username")} ({t("common.uniqueUser")})
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="johndoe" {...field} />
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -99,12 +93,11 @@ export default function SignupForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{t("auth.password")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
                         {...field}
                       />
                       <button
@@ -125,18 +118,17 @@ export default function SignupForm() {
               )}
             />
 
-            {/* Password Confirm */}
+            {/* Confirm Password */}
             <FormField
               control={form.control}
               name="passwordConfirm"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
+                  <FormLabel>{t("auth.confirmPassword")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
                         type={showPasswordConfirm ? "text" : "password"}
-                        placeholder="••••••••"
                         {...field}
                       />
                       <button
@@ -162,7 +154,7 @@ export default function SignupForm() {
             {/* Submit Button */}
             <Button type="submit" disabled={isPending} className="w-full">
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create User
+              {t("users.createUser")}
             </Button>
           </form>
         </Form>

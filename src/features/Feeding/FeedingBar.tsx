@@ -5,6 +5,7 @@ import { useWebSocketMessage } from "../../components/hooks/useWebSocketMessage"
 import { Progress } from "@/components/ui/progress";
 import { FeedingStatusPayload, HorsesStatsResponse } from "@/types";
 import { useGetActiveFeedingStatus } from "../Horses/horseHooks";
+import { useTranslation } from "react-i18next";
 
 interface FeedingBarProps {
   horseId: string;
@@ -20,6 +21,7 @@ const progressMap: Record<string, number> = {
 };
 
 export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -32,15 +34,13 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
 
       console.log(`📊 Feeding status for ${horseName}:`, data);
 
-      // Clear pending hide timers
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
 
-      // ✅ Update React Query cache directly
       queryClient.setQueryData<HorsesStatsResponse>(
-        ["horses-stats"], // ✅ Fixed: no pagination
+        ["horses-stats"],
         (oldData) => {
           if (!oldData) {
             return {
@@ -82,11 +82,10 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
         },
       );
 
-      // ✅ Clear from cache after completion / failure
       if (data.status === "COMPLETED" || data.status === "FAILED") {
         timeoutRef.current = setTimeout(() => {
           queryClient.setQueryData<HorsesStatsResponse>(
-            ["horses-stats"], // ✅ Fixed: no pagination
+            ["horses-stats"],
             (oldData) => {
               if (!oldData) return oldData;
 
@@ -109,7 +108,6 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
   ]);
 
   const feeding = activeFeedingStatus;
-
   if (isFetching || !feeding) return null;
 
   const progress = progressMap[feeding.status] ?? 0;
@@ -118,35 +116,35 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
     switch (feeding.status) {
       case "PENDING":
         return {
-          text: "Feed request pending",
+          text: t("feedingBar.status.pending"),
           color: "text-slate-700",
           bgColor: "bg-slate-50 border-slate-200",
           icon: <FaSpinner className="animate-spin text-slate-600" />,
         };
       case "STARTED":
         return {
-          text: "Feeding started",
+          text: t("feedingBar.status.started"),
           color: "text-amber-800",
           bgColor: "bg-amber-50 border-amber-200",
           icon: <FaSpinner className="animate-spin text-amber-600" />,
         };
       case "RUNNING":
         return {
-          text: "Feeding in progress",
+          text: t("feedingBar.status.running"),
           color: "text-teal-800",
           bgColor: "bg-teal-50 border-teal-200",
           icon: <FaSpinner className="animate-spin text-teal-600" />,
         };
       case "COMPLETED":
         return {
-          text: "Feeding completed successfully",
+          text: t("feedingBar.status.completed"),
           color: "text-emerald-800",
           bgColor: "bg-emerald-50 border-emerald-200",
           icon: <FaCheckCircle className="text-emerald-600" />,
         };
       case "FAILED":
         return {
-          text: "Feeding failed",
+          text: t("feedingBar.status.failed"),
           color: "text-rose-800",
           bgColor: "bg-rose-50 border-rose-200",
           icon: <span className="text-rose-600 text-lg font-semibold">✕</span>,
@@ -186,7 +184,9 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
             }
           />
           <div className="flex items-center justify-between text-xs">
-            <span className={statusDisplay.color}>{progress}% complete</span>
+            <span className={statusDisplay.color}>
+              {t("feedingBar.progressComplete", { progress })}
+            </span>
           </div>
         </div>
       </div>

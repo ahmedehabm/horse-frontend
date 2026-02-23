@@ -1,4 +1,3 @@
-// features/Stream/StreamBtn.tsx
 import { useCallback, useState, useEffect } from "react";
 import { FaVideo, FaSpinner, FaEye } from "react-icons/fa";
 import toast from "react-hot-toast";
@@ -8,7 +7,7 @@ import { useWebSocketMessage } from "@/components/hooks/useWebSocketMessage";
 import { Horse, StreamStatusPayload, HorsesStatsResponse } from "@/types";
 import StreamModal from "./StreamModal";
 import { useGetActiveStreamStatus } from "../Horses/horseHooks";
-import { streamTokenStorage } from "./streamStorage";
+import { useTranslation } from "react-i18next";
 
 interface StreamBtnProps {
   horse: Horse;
@@ -16,39 +15,21 @@ interface StreamBtnProps {
 }
 
 export default function StreamBtn({ horse, className = "" }: StreamBtnProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { isConnected, sendMessage } = useWebSocket();
   const { activeStream, isFetching } = useGetActiveStreamStatus();
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [token, setToken] = useState<string | null>(() =>
-    streamTokenStorage.get(),
-  );
 
-  // Derived state from server
   const isThisHorseActive = activeStream?.horseId === horse.id;
-
   const isPending = isThisHorseActive && activeStream?.status === "PENDING";
-
   const isStreaming = isThisHorseActive && activeStream?.status === "STARTED";
+  const token = isStreaming ? (activeStream?.streamToken ?? null) : null;
 
-  const isIdle = !isThisHorseActive || activeStream === null;
-
-  // Sync token from localStorage on mount/focus
+  // Auto-open modal when streaming starts and token is available
   useEffect(() => {
-    const syncToken = () => {
-      setToken(streamTokenStorage.get());
-    };
-
-    window.addEventListener("focus", syncToken);
-    return () => window.removeEventListener("focus", syncToken);
-  }, []);
-
-  // Auto-open modal when streaming starts and we have token
-  useEffect(() => {
-    if (isStreaming && token) {
-      setModalOpen(true);
-    }
+    if (isStreaming && token) setModalOpen(true);
   }, [isStreaming, token]);
 
   /**
@@ -61,57 +42,50 @@ export default function StreamBtn({ horse, className = "" }: StreamBtnProps) {
       console.log(`📡 Stream status for ${horse.name}:`, data);
 
       if (data.status === "STARTED" && data.streamUrl) {
-        // Extract and save token
         const tokenMatch = data.streamUrl.match(/\/stream\/(.+)/);
         const extractedToken = tokenMatch?.[1];
 
-        if (extractedToken) {
-          streamTokenStorage.set(extractedToken);
-          setToken(extractedToken);
-        }
-
-        // Update cache
         queryClient.setQueryData<HorsesStatsResponse>(
           ["horses-stats"],
           (oldData) => {
             if (!oldData) {
               return {
                 activeFeedings: [],
-                activeStream: { horseId: data.horseId, status: "STARTED" },
+                activeStream: {
+                  horseId: data.horseId,
+                  status: "STARTED",
+                  streamToken: extractedToken,
+                },
               };
             }
             return {
               ...oldData,
-              activeStream: { horseId: data.horseId, status: "STARTED" },
+              activeStream: {
+                horseId: data.horseId,
+                status: "STARTED",
+                streamToken: extractedToken,
+              },
             };
           },
         );
 
-        toast.success(`📡 Stream started for ${horse.name}`);
+        toast.success(t("streaming.liveStreamFor", { horseName: horse.name }));
       }
 
-      if (data.status === "STREAM_STOPPED") {
-        // Clear token
-        streamTokenStorage.clear();
-        setToken(null);
+      // if (data.status === "STREAM_STOPPED") {
+      //   queryClient.setQueryData<HorsesStatsResponse>(
+      //     ["horses-stats"],
+      //     (oldData) => {
+      //       if (!oldData) return oldData;
+      //       return { ...oldData, activeStream: null };
+      //     },
+      //   );
 
-        // Update cache
-        queryClient.setQueryData<HorsesStatsResponse>(
-          ["horses-stats"],
-          (oldData) => {
-            if (!oldData) return oldData;
-            return {
-              ...oldData,
-              activeStream: null,
-            };
-          },
-        );
-
-        setModalOpen(false);
-        toast("📴 Stream stopped", { icon: "📴" });
-      }
+      //   setModalOpen(false);
+      //   toast(t("streaming.streamStopped"), { icon: "📴" });
+      // }
     },
-    [horse.id, horse.name, queryClient],
+    [horse.id, horse.name, queryClient, t],
   );
 
   useWebSocketMessage("STREAM_STATUS", handleStreamStatus, [
@@ -121,27 +95,39 @@ export default function StreamBtn({ horse, className = "" }: StreamBtnProps) {
   /**
    * Start stream
    */
+  /**
+   * Start stream
+   */
   const handleStartStream = useCallback(() => {
     if (!isConnected) {
-      toast.error("Not connected to server.");
+      toast.error(t("streaming.notConnected", "Not connected to server."));
       return;
     }
-
     if (!horse.camera) {
-      toast.error(`${horse.name} has no camera assigned.`);
+      toast.error(
+        t("streaming.noCamera", { horseName: horse.name }) ||
+          `${horse.name} has no camera assigned.`,
+      );
       return;
     }
 
-    // Optimistically set to PENDING
+    // Send the message FIRST
+    const success = sendMessage({ type: "START_STREAM", horseId: horse.id });
+
+    if (!success) {
+      toast.error(t("streaming.startFailed", "Failed to start stream."));
+      return;
+    }
+
+    // Only set optimistic PENDING state if sending was successful
     queryClient.setQueryData<HorsesStatsResponse>(
       ["horses-stats"],
       (oldData) => {
-        if (!oldData) {
+        if (!oldData)
           return {
             activeFeedings: [],
             activeStream: { horseId: horse.id, status: "PENDING" },
           };
-        }
         return {
           ...oldData,
           activeStream: { horseId: horse.id, status: "PENDING" },
@@ -149,63 +135,39 @@ export default function StreamBtn({ horse, className = "" }: StreamBtnProps) {
       },
     );
 
-    const success = sendMessage({
-      type: "START_STREAM",
-      horseId: horse.id,
-    });
-
-    if (!success) {
-      // Revert on failure
-      queryClient.setQueryData<HorsesStatsResponse>(
-        ["horses-stats"],
-        (oldData) => {
-          if (!oldData) return oldData;
-          return {
-            ...oldData,
-            activeStream: null,
-          };
-        },
-      );
-      toast.error("Failed to start stream.");
-    }
-  }, [isConnected, horse, sendMessage, queryClient]);
-
+    // Don't show toast - let the WebSocket STREAM_STATUS handler show the success toast
+  }, [isConnected, horse, sendMessage, queryClient, t]);
   /**
    * Stop stream
    */
   const handleStopStream = useCallback(() => {
-    sendMessage({
-      type: "STOP_STREAM",
-      horseId: horse.id,
-    });
+    const success = sendMessage({ type: "STOP_STREAM", horseId: horse.id });
 
-    // Optimistically clear
-    streamTokenStorage.clear();
-    setToken(null);
+    if (!success) {
+      toast.error(t("streaming.stopFailed", "Failed to stop stream"));
+      return;
+    }
 
     queryClient.setQueryData<HorsesStatsResponse>(
       ["horses-stats"],
       (oldData) => {
         if (!oldData) return oldData;
-        return {
-          ...oldData,
-          activeStream: null,
-        };
+        return { ...oldData, activeStream: null };
       },
     );
 
     setModalOpen(false);
-  }, [horse.id, sendMessage, queryClient]);
+  }, [horse.id, sendMessage, queryClient, t]);
 
   // Loading state
   if (isFetching) {
     return (
       <button
         disabled
-        className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm shadow-lg bg-gray-200 text-gray-500 ${className}`}
+        className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl shadow-lg transition-all duration-200 text-sm bg-gray-200 text-gray-500 ${className}`}
       >
         <FaSpinner className="animate-spin" />
-        <span>LOADING…</span>
+        <span>{t("streaming.loading", "LOADING…")}</span>
       </button>
     );
   }
@@ -219,17 +181,18 @@ export default function StreamBtn({ horse, className = "" }: StreamBtnProps) {
 
   const getButtonStyles = () => {
     if (isPending) return "bg-amber-500 text-white cursor-wait";
-    if (anotherHorseStreaming)
+    if (anotherHorseStreaming || !horse.camera)
       return "bg-gray-300 text-gray-500 cursor-not-allowed";
-    if (!horse.camera) return "bg-gray-300 text-gray-500 cursor-not-allowed";
     return "bg-primary text-primary-foreground hover:bg-primary/90";
   };
 
   const getButtonTitle = () => {
-    if (!horse.camera) return "No camera assigned";
-    if (anotherHorseStreaming) return "Another horse is streaming";
-    if (isPending) return "Starting stream...";
-    return `Start stream for ${horse.name}`;
+    if (!horse.camera)
+      return t("streaming.noCamera", { horseName: horse.name });
+    if (anotherHorseStreaming)
+      return t("streaming.anotherHorseStreaming", "Another horse is streaming");
+    if (isPending) return t("streaming.starting");
+    return t("streaming.startStream");
   };
 
   return (
@@ -240,18 +203,18 @@ export default function StreamBtn({ horse, className = "" }: StreamBtnProps) {
           <button
             onClick={handleStartStream}
             disabled={isDisabled!}
-            className={`flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm shadow-lg transition-all ${getButtonStyles()}`}
+            className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl shadow-lg transition-all duration-200 text-sm ${getButtonStyles()}`}
             title={getButtonTitle()}
           >
             {isPending ? (
               <>
                 <FaSpinner className="animate-spin" />
-                <span>STARTING…</span>
+                <span>{t("streaming.starting")}</span>
               </>
             ) : (
               <>
                 <FaVideo />
-                <span>START STREAM</span>
+                <span>{t("streaming.startStream")}</span>
               </>
             )}
           </button>
@@ -261,10 +224,11 @@ export default function StreamBtn({ horse, className = "" }: StreamBtnProps) {
         {isStreaming && (
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm shadow-lg transition-all bg-emerald-500 text-white hover:bg-emerald-600"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl shadow-lg transition-all duration-200 text-sm bg-emerald-500 text-white hover:bg-emerald-600"
+            title={t("streaming.liveStreamFor", { horseName: horse.name })}
           >
             <FaEye />
-            <span>VIEW STREAM</span>
+            <span>{t("streaming.viewStream")}</span>
             <span className="relative flex h-2 w-2 ml-1">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
@@ -274,7 +238,6 @@ export default function StreamBtn({ horse, className = "" }: StreamBtnProps) {
       </div>
 
       {/* Stream Modal */}
-
       {isStreaming && token && (
         <StreamModal
           horse={horse}

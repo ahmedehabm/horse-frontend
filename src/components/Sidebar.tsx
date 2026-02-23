@@ -11,6 +11,7 @@ import { Loader2 } from "lucide-react";
 import { useLogout, useSession } from "../features/Auth/authHooks";
 import { Dispatch, SetStateAction } from "react";
 import { useWebSocket } from "./WebSocketContext";
+import { useTranslation } from "react-i18next";
 
 export default function Sidebar({
   sidebarOpen,
@@ -24,42 +25,26 @@ export default function Sidebar({
   const { user } = useSession();
   const { logout, isPending } = useLogout();
   const { getSocket } = useWebSocket();
-  // Role-based navigation links
+  const { t } = useTranslation();
+
+  const isAdmin = role === "ADMIN";
+
+  // 🔥 IMPORTANT: use translation keys instead of labels
   const navLinks =
     role === "ADMIN"
       ? [
-          {
-            to: "/admin/horses",
-            icon: FaHorseHead,
-            label: "Manage Horses",
-          },
-          {
-            to: "/admin/devices",
-            icon: FaBox,
-            label: "Manage Devices",
-          },
-          {
-            to: "/admin/users",
-            icon: FaUsers,
-            label: "Users",
-          },
-          {
-            to: "/admin/signup",
-            icon: FaUserPlus,
-            label: "Signup Users",
-          },
+          { to: "/admin/horses", icon: FaHorseHead, key: "nav.manageHorses" },
+          { to: "/admin/devices", icon: FaBox, key: "nav.manageDevices" },
+          { to: "/admin/users", icon: FaUsers, key: "nav.users" },
+          { to: "/admin/signup", icon: FaUserPlus, key: "users.signupUsers" },
         ]
       : [
           {
             to: "/user/dashboard",
             icon: FaTachometerAlt,
-            label: "Dashboard",
+            key: "nav.dashboard",
           },
-          {
-            to: "/user/feeders",
-            icon: FaTachometerAlt,
-            label: "Feeders",
-          },
+          { to: "/user/feeders", icon: FaTachometerAlt, key: "nav.feeders" },
         ];
 
   async function handleLogout() {
@@ -67,36 +52,33 @@ export default function Sidebar({
 
     try {
       if (socket?.connected) {
-        // Wait up to 800ms for server to confirm it processed LOGOUT
         await socket.timeout(800).emitWithAck("LOGOUT");
       }
     } catch {
-      // ignore: fallback will be disconnecting path (5s grace)
+      // ignore
     } finally {
-      logout(); // now do your react-query logout + navigation
+      logout();
     }
   }
-  const isAdmin = role === "ADMIN";
 
   return (
     <>
-      {/* Sidebar - Desktop and Mobile */}
       <aside
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 fixed lg:sticky top-0 left-0 h-screen w-64 lg:w-80 bg-white/80 backdrop-blur-md border-r border-green-100 shadow-xl flex flex-col transition-all duration-300 ease-in-out z-30 lg:z-auto`}
       >
-        {/* Logo/Header */}
+        {/* Header */}
         <div className="px-6 py-6 border-b border-green-100 bg-linear-to-r from-green-50 to-emerald-50">
           <h2 className="text-2xl font-bold bg-linear-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent">
-            {isAdmin ? "Admin Portal" : "User Dashboard"}
+            {isAdmin ? t("sidebar.adminPortal") : t("sidebar.userDashboard")}
           </h2>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 p-6 overflow-y-auto">
           <ul className="space-y-1">
-            {navLinks.map(({ to, icon: Icon, label }) => (
+            {navLinks.map(({ to, icon: Icon, key }) => (
               <li key={to}>
                 <NavLink
                   to={to}
@@ -111,7 +93,7 @@ export default function Sidebar({
                 >
                   <Icon className="text-xl group-hover:scale-110 transition-transform" />
                   <span className="font-semibold text-sm tracking-wide">
-                    {label}
+                    {t(key)}
                   </span>
                 </NavLink>
               </li>
@@ -119,7 +101,7 @@ export default function Sidebar({
           </ul>
         </nav>
 
-        {/* User Info & Logout */}
+        {/* User Info */}
         <div className="p-6 border-t border-green-100 bg-green-50/50">
           <div className="flex items-center gap-4 mb-4 px-3 py-3 bg-white/60 rounded-xl backdrop-blur-sm border border-green-100">
             <div
@@ -135,14 +117,19 @@ export default function Sidebar({
                 <FaTachometerAlt className="text-white text-lg" />
               )}
             </div>
+
             <div className="flex-1 min-w-0">
               <p className="font-bold text-gray-900 text-sm truncate">
-                {user?.name || (isAdmin ? "Super Admin" : "User")}
+                {user?.name || t("sidebar.defaultName", { role })}
               </p>
+
               <p className="text-xs text-gray-600 truncate mt-0.5">
                 {user?.username ||
-                  (isAdmin ? "admin@ostler.com" : "user@ostler.com")}
+                  (isAdmin
+                    ? t("sidebar.defaultAdminEmail")
+                    : t("sidebar.defaultUserEmail"))}
               </p>
+
               <span
                 className={`inline-block mt-1.5 px-3 py-1 text-xs font-bold rounded-full border shadow-sm ${
                   isAdmin
@@ -150,7 +137,7 @@ export default function Sidebar({
                     : "bg-linear-to-r from-blue-100 to-sky-100 text-blue-800 border-blue-200"
                 }`}
               >
-                {isAdmin ? "Administrator" : "User"}
+                {isAdmin ? t("sidebar.administrator") : t("sidebar.user")}
               </span>
             </div>
           </div>
@@ -163,19 +150,18 @@ export default function Sidebar({
             {isPending ? (
               <>
                 <Loader2 className="text-lg animate-spin" />
-                <span>Logging out...</span>
+                <span>{t("auth.loggingOut")}</span>
               </>
             ) : (
               <>
                 <FaSignOutAlt className="text-lg" />
-                <span>Sign Out</span>
+                <span>{t("auth.signOut")}</span>
               </>
             )}
           </button>
         </div>
       </aside>
 
-      {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}

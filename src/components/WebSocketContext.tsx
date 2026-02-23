@@ -70,7 +70,7 @@ export function SocketIOProvider({ children }: { children: ReactNode }) {
 
       //  Connection error
       socket.on("connect_error", (error) => {
-        // console.error("❌ Socket.IO connection error:", error.message);
+        console.error("❌ Socket.IO connection error:", error.message);
         setConnectionError(`Connection error: ${error.message}`);
         setIsConnected(false);
       });
@@ -137,7 +137,7 @@ export function SocketIOProvider({ children }: { children: ReactNode }) {
     };
   }, [connect]);
 
-  // ✅ BACKWARD COMPATIBLE sendMessage - works like old WebSocket
+  // BACKWARD COMPATIBLE sendMessage - works like old WebSocket
   const sendMessage = useCallback(
     (
       messageOrEvent: string | { type: string; [key: string]: any },
@@ -148,21 +148,16 @@ export function SocketIOProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
-      // ✅ NEW: If two parameters, use as (eventName, data)
       if (data !== undefined) {
         socketRef.current.emit(messageOrEvent as string, data);
         return true;
       }
 
-      // ✅ OLD: If one parameter (object with type field), extract type and emit
       if (typeof messageOrEvent === "object" && messageOrEvent.type) {
         const { type, ...payload } = messageOrEvent;
         socketRef.current.emit(type, payload);
         return true;
       }
-
-      // Fallback: just emit the message as-is
-      console.warn("⚠️ Unexpected sendMessage format:", messageOrEvent);
       return false;
     },
     [],

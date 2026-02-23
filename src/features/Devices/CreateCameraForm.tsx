@@ -1,9 +1,9 @@
-// src/components/CreateCameraDialog.tsx
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import {
   Dialog,
@@ -24,16 +24,17 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useCreateDevice } from "./deviceHooks";
-import { createCameraSchema } from "@/lib/validators";
+import { getCreateCameraSchema } from "@/lib/validators";
 
-type FormValues = z.infer<typeof createCameraSchema>;
+type FormValues = z.infer<ReturnType<typeof getCreateCameraSchema>>;
 
 export default function CreateCameraDialog() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { createDevice, isPending } = useCreateDevice();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(createCameraSchema),
+    resolver: zodResolver(getCreateCameraSchema()),
     defaultValues: {
       thingLabel: "",
       deviceType: "CAMERA",
@@ -53,27 +54,27 @@ export default function CreateCameraDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Create Camera</Button>
+        <Button>{t("devices.createCamera")}</Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create Camera Device</DialogTitle>
+          <DialogTitle>{t("devices.createCameraDevice")}</DialogTitle>
           <DialogDescription>
-            Add a new camera device to the system
+            {t("devices.addCameraDescription")}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Thing Label */}
+            {/* Device Name */}
             <FormField
               control={form.control}
               name="thingLabel"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Device Name (Must be unique for each device)
+                    {t("common.deviceName")} ({t("common.uniqueDevice")})
                   </FormLabel>
                   <FormControl>
                     <Input placeholder="CAMERA-STABLE-001" {...field} />
@@ -89,7 +90,7 @@ export default function CreateCameraDialog() {
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Location</FormLabel>
+                  <FormLabel>{t("common.location")}</FormLabel>
                   <FormControl>
                     <Input placeholder="Stable A, Barn 3" {...field} />
                   </FormControl>
@@ -106,11 +107,12 @@ export default function CreateCameraDialog() {
                 onClick={() => setOpen(false)}
                 disabled={isPending}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
+
               <Button type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Camera
+                {t("devices.createCamera")}
               </Button>
             </div>
           </form>

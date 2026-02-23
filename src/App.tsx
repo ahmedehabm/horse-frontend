@@ -11,11 +11,13 @@ import Dashboard from "./pages/User/DashBoardPage";
 import Users from "./pages/Admin/Users";
 import Devices from "./pages/Admin/Devices";
 import SignUp from "./pages/Admin/SignUp";
+import Feeders from "./pages/User/Feeders";
+import Horses from "./pages/Admin/Horses";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 0,
+      staleTime: 5 * 60 * 1000,
     },
   },
 });
@@ -37,7 +39,7 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route path="horses" element={<>horses</>} />
+            <Route path="horses" element={<Horses />} />
             <Route path="devices" element={<Devices />} />
             <Route path="users" element={<Users />} />
             <Route path="signup" element={<SignUp />} />
@@ -53,7 +55,7 @@ function App() {
             }
           >
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="feeders" element={<>feeders</>} />
+            <Route path="feeders" element={<Feeders />} />
           </Route>
 
           {/*  */}

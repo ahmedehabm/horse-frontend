@@ -36,6 +36,7 @@ export async function getDeviceOptions(params: Record<string, any> = {}) {
     options: data.data.devices,
   };
 }
+
 export async function getMyFeeders(params: Record<string, any> = {}) {
   const query = new URLSearchParams(params).toString();
   const url = `/devices/my/feeders${query ? `?${query}` : ""}`;
@@ -47,6 +48,33 @@ export async function getMyFeeders(params: Record<string, any> = {}) {
     count: data.pagination.total,
     totalPages: data.pagination.totalPages,
   };
+}
+
+export async function getMyFeeder(id: string) {
+  const data = await apiRequest(`/devices/my/feeders/${id}`);
+
+  return {
+    feeder: data.data.feeder,
+  };
+}
+
+export async function updateMyFeeder(
+  id: string,
+  payload: {
+    feederType: "MANUAL" | "SCHEDULED";
+    scheduledAmountKg?: number;
+    morningTime?: string;
+    dayTime?: string;
+    nightTime?: string;
+  },
+) {
+  return apiRequest(`/devices/my/feeders/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 }
 
 export async function getAdminDevices(params: Record<string, any> = {}) {
@@ -75,6 +103,44 @@ export async function createDevice(payload: {
   return apiRequest("/devices", {
     method: "POST",
     body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+export async function getDevice(id: string) {
+  const data = await apiRequest(`/devices/${id}`);
+  return {
+    device: data.data.device,
+  };
+}
+
+export async function updateDevice(
+  id: string,
+  payload: {
+    thingLabel: string;
+    location: string;
+
+    // feeder-specific
+    feederType?: "MANUAL" | "SCHEDULED";
+    morningTime?: string;
+    dayTime?: string;
+    nightTime?: string;
+  },
+) {
+  return apiRequest(`/devices/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+export async function forceUnassign(id: string) {
+  return apiRequest(`/devices/unassign/${id}`, {
+    method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },

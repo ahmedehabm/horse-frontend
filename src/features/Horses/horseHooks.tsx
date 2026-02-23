@@ -3,11 +3,13 @@ import toast from "react-hot-toast";
 import { useSearchParams } from "react-router-dom";
 import {
   createHorse as createHorseApi,
+  getAllHorses,
   getHorsesStats,
   getMyHorses,
 } from "../../services/apiHorse";
-import { LIMIT_RES } from "@/constants";
+import { HORSE_USER_RES, LIMIT_RES } from "@/constants";
 import { HorsesStatsResponse } from "@/types";
+import { useTranslation } from "react-i18next";
 
 export function useGetHorsesUser() {
   const [searchParams] = useSearchParams();
@@ -22,7 +24,27 @@ export function useGetHorsesUser() {
     isFetching,
   } = useQuery({
     queryKey: ["horses-user", page],
-    queryFn: () => getMyHorses({ page, limit: LIMIT_RES }),
+    queryFn: () => getMyHorses({ page, limit: HORSE_USER_RES }),
+    placeholderData: (previousData) => previousData,
+  });
+
+  return { horses, count, totalPages, isFetching, error };
+}
+
+export function useGetAllHorses() {
+  const [searchParams] = useSearchParams();
+
+  // Pagination
+  const page = !searchParams.get("page") ? 1 : Number(searchParams.get("page"));
+
+  // Query with optimized settings
+  const {
+    data: { horses = [], count, totalPages } = {},
+    error,
+    isFetching,
+  } = useQuery({
+    queryKey: ["horses", page],
+    queryFn: () => getAllHorses({ page, limit: LIMIT_RES }),
     placeholderData: (previousData) => previousData,
   });
 
@@ -72,6 +94,7 @@ export function useGetActiveStreamStatus() {
 
 export function useCreateHorse() {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const {
     mutate: createHorse,
@@ -82,16 +105,14 @@ export function useCreateHorse() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["horses"] });
       queryClient.invalidateQueries({ queryKey: ["device-options"] });
-      toast.success("Horse created successfully");
+      toast.success(t("horses.horseCreatedSuccess"));
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create horse");
+    onError: (err: Error) => {
+      toast.error(
+        err.message || t("horses.createHorseFailed", "Failed to create horse"),
+      );
     },
   });
 
-  return {
-    createHorse,
-    isPending,
-    error,
-  };
+  return { createHorse, isPending, error };
 }

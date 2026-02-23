@@ -3,6 +3,7 @@ import { useTransition } from "react";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi2";
 import { useSearchParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function Pagination({
   label,
@@ -15,12 +16,15 @@ function Pagination({
   totalPages: number;
   limit: number;
 }) {
+  const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const currentPage = Number(searchParams.get("page") ?? 1);
-
   const pageCount = totalPages || Math.ceil(count / limit);
+
+  const from = (currentPage - 1) * limit + 1;
+  const to = Math.min(currentPage * limit, count);
 
   function nextPage() {
     startTransition(() => {
@@ -44,19 +48,12 @@ function Pagination({
     <div className="w-full flex flex-col sm:flex-row items-center justify-between py-8 gap-6 bg-linear-to-r from-green-50/80 to-emerald-50/80 backdrop-blur-sm rounded-2xl border border-green-100 px-6 shadow-lg">
       {/* Results Info */}
       <p className="text-sm text-green-800 font-medium">
-        Showing{" "}
-        <span className="font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
-          {(currentPage - 1) * limit + 1}
-        </span>{" "}
-        to{" "}
-        <span className="font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
-          {Math.min(currentPage * limit, count)}
-        </span>{" "}
-        of{" "}
-        <span className="font-bold text-green-700">
-          {count.toLocaleString()}
-        </span>{" "}
-        {label}
+        {t("common.showing", {
+          from,
+          to,
+          total: count.toLocaleString(i18n.language),
+        })}{" "}
+        {t(`pagination.${label}`)}
       </p>
 
       {/* Pagination Controls */}
@@ -64,6 +61,7 @@ function Pagination({
         {isPending && (
           <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white/90 px-3 py-2 rounded-xl shadow-lg border border-green-200">
             <Loader2 className="w-5 h-5 animate-spin text-green-600 mx-auto" />
+            <p className="text-xs mt-1 text-green-700">{t("common.loading")}</p>
           </div>
         )}
 
@@ -74,12 +72,13 @@ function Pagination({
             className="group flex items-center gap-2 px-5 py-3 bg-white/80 backdrop-blur-sm border border-green-200 rounded-xl text-green-700 font-semibold text-sm hover:bg-linear-to-r hover:from-green-500 hover:to-emerald-500 hover:text-white hover:border-green-400 hover:shadow-xl hover:shadow-green-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
           >
             <HiChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span>Previous</span>
+            <span>{t("common.previous")}</span>
           </button>
         )}
 
         <div className="hidden sm:flex items-center gap-1 text-sm font-semibold text-green-700 bg-green-100/60 px-4 py-2 rounded-full border border-green-200">
-          Page {currentPage} of {pageCount}
+          {t("pagination.page", "Page")} {currentPage}{" "}
+          {t("pagination.of", "of")} {pageCount}
         </div>
 
         {currentPage !== pageCount && (
@@ -88,7 +87,7 @@ function Pagination({
             disabled={isPending}
             className="group flex items-center gap-2 px-5 py-3 bg-white/80 backdrop-blur-sm border border-green-200 rounded-xl text-green-700 font-semibold text-sm hover:bg-linear-to-r hover:from-green-500 hover:to-emerald-500 hover:text-white hover:border-green-400 hover:shadow-xl hover:shadow-green-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
           >
-            <span>Next</span>
+            <span>{t("common.next")}</span>
             <HiChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
         )}

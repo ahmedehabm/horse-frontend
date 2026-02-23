@@ -1,9 +1,9 @@
-// src/components/CreateFeederDialog.tsx
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import {
   Dialog,
@@ -30,22 +30,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createFeederSchema } from "@/lib/validators";
+import { getCreateFeederSchema } from "@/lib/validators";
 import { useCreateDevice } from "./deviceHooks";
 
-type FormValues = z.infer<typeof createFeederSchema>;
+type FormValues = z.infer<ReturnType<typeof getCreateFeederSchema>>;
 
 export default function CreateFeederDialog() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { createDevice, isPending } = useCreateDevice();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(createFeederSchema),
+    resolver: zodResolver(getCreateFeederSchema()),
     defaultValues: {
       thingLabel: "",
       deviceType: "FEEDER",
       location: "",
       feederType: "MANUAL",
+      scheduledAmountKg: undefined,
       morningTime: "",
       dayTime: "",
       nightTime: "",
@@ -62,14 +64,13 @@ export default function CreateFeederDialog() {
       feederType: values.feederType,
     };
 
-    // Only include time fields if SCHEDULED
     if (values.feederType === "SCHEDULED") {
+      payload.scheduledAmountKg = values.scheduledAmountKg;
       if (values.morningTime) payload.morningTime = values.morningTime;
       if (values.dayTime) payload.dayTime = values.dayTime;
       if (values.nightTime) payload.nightTime = values.nightTime;
     }
 
-    console.log(payload);
     createDevice(payload, {
       onSuccess: () => {
         setOpen(false);
@@ -81,27 +82,27 @@ export default function CreateFeederDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Create Feeder</Button>
+        <Button>{t("devices.createFeeder")}</Button>
       </DialogTrigger>
 
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create Feeder Device</DialogTitle>
+          <DialogTitle>{t("devices.createFeeder")}</DialogTitle>
           <DialogDescription>
-            Add a new feeder device to the system
+            {t("devices.addCameraDescription")}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Thing Label */}
+            {/* Device Name */}
             <FormField
               control={form.control}
               name="thingLabel"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Device Name (Must be unique for each device)
+                    {t("common.deviceName")} ({t("common.uniqueDevice")})
                   </FormLabel>
                   <FormControl>
                     <Input placeholder="FEEDER-STABLE-001" {...field} />
@@ -117,7 +118,7 @@ export default function CreateFeederDialog() {
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Location</FormLabel>
+                  <FormLabel>{t("common.location")}</FormLabel>
                   <FormControl>
                     <Input placeholder="Stable A, Barn 3" {...field} />
                   </FormControl>
@@ -132,16 +133,22 @@ export default function CreateFeederDialog() {
               name="feederType"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Feeder Type</FormLabel>
+                  <FormLabel>
+                    {t("feederTypes.manual")}/{t("feederTypes.scheduled")}
+                  </FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select feeder type" />
+                        <SelectValue placeholder={t("feederTypes.manual")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="MANUAL">Manual</SelectItem>
-                      <SelectItem value="SCHEDULED">Scheduled</SelectItem>
+                      <SelectItem value="MANUAL">
+                        {t("feederTypes.manual")}
+                      </SelectItem>
+                      <SelectItem value="SCHEDULED">
+                        {t("feederTypes.scheduled")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -149,45 +156,74 @@ export default function CreateFeederDialog() {
               )}
             />
 
-            {/* Scheduled Times - Only show if SCHEDULED */}
+            {/* Scheduled Fields */}
             {feederType === "SCHEDULED" && (
               <>
+                <FormField
+                  control={form.control}
+                  name="scheduledAmountKg"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {t("feederTypes.scheduledAmount")} *
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          min="0.1"
+                          max="50"
+                          placeholder="2.5"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="morningTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Morning Time (Optional)</FormLabel>
+                      <FormLabel>
+                        {t("feederTypes.morningTime")} (Optional)
+                      </FormLabel>
                       <FormControl>
-                        <Input type="time" placeholder="08:00" {...field} />
+                        <Input type="time" {...field} step={3600} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="dayTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Day Time (Optional)</FormLabel>
+                      <FormLabel>
+                        {t("feederTypes.dayTime")} (Optional)
+                      </FormLabel>
                       <FormControl>
-                        <Input type="time" placeholder="14:00" {...field} />
+                        <Input type="time" {...field} step={3600} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="nightTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Night Time (Optional)</FormLabel>
+                      <FormLabel>
+                        {t("feederTypes.nightTime")} (Optional)
+                      </FormLabel>
                       <FormControl>
-                        <Input type="time" placeholder="20:00" {...field} />
+                        <Input type="time" {...field} step={3600} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -204,11 +240,11 @@ export default function CreateFeederDialog() {
                 onClick={() => setOpen(false)}
                 disabled={isPending}
               >
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Feeder
+                {t("devices.createFeeder")}
               </Button>
             </div>
           </form>

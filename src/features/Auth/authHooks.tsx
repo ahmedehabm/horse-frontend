@@ -1,5 +1,7 @@
 // hooks/useAuth.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+
 import {
   getCurrentUser,
   login as loginApi,
@@ -30,7 +32,9 @@ export interface SignupInput {
 // ==============================
 // useLogin Hook
 // ==============================
+
 export function useLogin() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const {
@@ -39,14 +43,16 @@ export function useLogin() {
     error,
   } = useMutation<User, Error, LoginInput>({
     mutationFn: ({ username, password }) => loginApi(username, password),
+
     onSuccess: () => {
-      toast.success("Logged in successfully");
-      // Invalidate + refetch user session
+      toast.success(t("auth.loginSuccess"));
       queryClient.resetQueries({ queryKey: ["user"] });
     },
+
     onError: (err) => {
-      toast.error(err.message || "Login failed");
+      toast.error(err.message || t("auth.loginFailed"));
     },
+
     retry: false,
   });
 
@@ -87,6 +93,7 @@ export function useSession() {
 // useLogout Hook
 // ==============================
 export function useLogout() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -96,15 +103,18 @@ export function useLogout() {
     error,
   } = useMutation<void, Error>({
     mutationFn: logoutApi,
+
     onSuccess: () => {
       queryClient.clear();
-      toast.success("Logged out successfully");
+      toast.success(t("auth.logoutSuccess"));
       navigate("/", { replace: true });
     },
+
     onError: (err) => {
-      toast.error(err.message || "Logout failed");
+      toast.error(err.message || t("auth.logoutFailed"));
       queryClient.clear();
     },
+
     retry: false,
   });
 
@@ -115,7 +125,9 @@ export function useLogout() {
 // useSignup Hook
 // ==============================
 export function useSignup() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
+
   const {
     mutate: signUp,
     isPending,
@@ -123,15 +135,17 @@ export function useSignup() {
   } = useMutation<User, Error, SignupInput>({
     mutationFn: ({ name, username, password, passwordConfirm }) =>
       signUpApi({ name, username, password, passwordConfirm }),
-    onSuccess: () => {
-      toast.success("Account successfully created! Please log in.");
-      queryClient.invalidateQueries({ queryKey: ["users"] });
 
+    onSuccess: () => {
+      toast.success(t("auth.signupSuccess"));
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.clear();
     },
+
     onError: (err) => {
-      toast.error(err.message || "Signup failed");
+      toast.error(err.message || t("auth.signupFailed"));
     },
+
     retry: false,
   });
 

@@ -46,6 +46,7 @@ export async function getMyHorses(params: Record<string, any> = {}) {
 }
 
 export async function getAllHorses(params: Record<string, any> = {}) {
+  console.log("ssasa");
   const query = new URLSearchParams(params).toString();
   const url = `/horses/${query ? `?${query}` : ""}`;
 
@@ -64,7 +65,6 @@ export async function getAllHorses(params: Record<string, any> = {}) {
  */
 
 export async function getHorsesStats() {
-  console.log("SSSSTTTAAATS");
   try {
     const response = await apiRequest<{
       status: string;
@@ -81,21 +81,6 @@ export async function getHorsesStats() {
   }
 }
 
-// export async function createHorse(formData: any) {
-//   console.log(formData);
-//   const response = await apiRequest("/horses", {
-//     method: "POST",
-//     body: JSON.stringify(formData),
-//   });
-
-//   if (!response.ok) {
-//     const error = await response.json();
-//     throw new Error(error.message || "Failed to create horse");
-//   }
-
-//   return response.json();
-// }
-
 export async function createHorse(payload: {
   name: string;
   breed: string;
@@ -104,14 +89,27 @@ export async function createHorse(payload: {
   ownerId: string;
   feederId?: string;
   cameraId?: string;
-  image?: string; // will be a file
+  image?: File;
 }) {
-  console.log(JSON.stringify(payload));
+  const formData = new FormData();
+
+  // Append all text fields
+  formData.append("name", payload.name);
+  formData.append("breed", payload.breed);
+  formData.append("age", String(payload.age));
+  formData.append("location", payload.location);
+  formData.append("ownerId", payload.ownerId);
+
+  if (payload.feederId) formData.append("feederId", payload.feederId);
+  if (payload.cameraId) formData.append("cameraId", payload.cameraId);
+
+  // Append file if exists
+  if (payload.image) formData.append("image", payload.image);
+
+  console.log(formData);
+
   return apiRequest("/horses", {
     method: "POST",
-    body: JSON.stringify(payload),
-    headers: {
-      "Content-Type": "application/json",
-    },
+    body: formData,
   });
 }

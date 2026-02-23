@@ -28,6 +28,8 @@ export default function StreamModal({
 }: StreamModalProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [streamError, setStreamError] = useState(false);
+
+  //  Token comes from props (React Query) — single source of truth
   const streamUrl = `/stream/${token}`;
 
   const toggleFullscreen = useCallback(() => {
@@ -89,7 +91,6 @@ export default function StreamModal({
           id="stream-container"
           className="relative bg-black aspect-video w-full"
         >
-          {/*  MJPEG Stream using <img> tag */}
           {streamError ? (
             <div className="flex items-center justify-center h-full text-white">
               <div className="text-center">
@@ -150,12 +151,6 @@ export default function StreamModal({
 
         {/* Footer Actions */}
         <div className="p-4 pt-2 flex items-center justify-between border-t">
-          <div className="text-sm text-muted-foreground">
-            <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
-              Token: {token.slice(-8)}
-            </span>
-          </div>
-
           <Button
             variant="destructive"
             onClick={onStopStream}

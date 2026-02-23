@@ -1,8 +1,8 @@
-// src/components/CreateHorseDialog.tsx
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import {
   Dialog,
@@ -30,13 +30,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { CreateHorseFormData, createHorseSchema } from "@/lib/validators";
+import { getCreateHorseSchema } from "@/lib/validators";
 import { useCreateHorse } from "./horseHooks";
 import {
   useUnassignedCameraOptions,
   useUnassignedFeederOptions,
 } from "../Devices/deviceHooks";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import z from "zod";
 
 interface CreateHorseDialogProps {
   ownerId: string;
@@ -44,28 +45,30 @@ interface CreateHorseDialogProps {
   triggerAsMenuItem?: boolean;
 }
 
+type CreateHorseFormData = z.infer<ReturnType<typeof getCreateHorseSchema>>;
+
 export default function CreateHorseDialog({
   ownerId,
   ownerName,
   triggerAsMenuItem = false,
 }: CreateHorseDialogProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   const { options: feederOptions, isFetching: isFetchingFeeders } =
     useUnassignedFeederOptions({ enabled: open });
-
   const { options: cameraOptions, isFetching: isFetchingCameras } =
     useUnassignedCameraOptions({ enabled: open });
 
   const { createHorse, isPending } = useCreateHorse();
 
   const form = useForm<CreateHorseFormData>({
-    resolver: zodResolver(createHorseSchema),
+    resolver: zodResolver(getCreateHorseSchema()),
     defaultValues: {
-      name: "wwfw",
-      breed: "sfvsv",
-      age: 1,
-      location: "dwded",
+      name: "dehj",
+      breed: "ddeded",
+      age: 4,
+      location: "eddrcrc",
       ownerId,
       feederId: undefined,
       cameraId: undefined,
@@ -88,28 +91,27 @@ export default function CreateHorseDialog({
         {triggerAsMenuItem ? (
           <DropdownMenuItem
             className="cursor-pointer"
-            // prevents the dropdown from "stealing" focus / weird close issues
             onSelect={(e) => {
               e.preventDefault();
               setOpen(true);
             }}
           >
-            Create horse for user
+            {t("horses.createHorseForUser")}
           </DropdownMenuItem>
         ) : (
           <Button size="sm" variant="outline">
-            Create Horse
+            {t("horses.createHorse")}
           </Button>
         )}
       </DialogTrigger>
 
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create Horse</DialogTitle>
+          <DialogTitle>{t("horses.createHorse")}</DialogTitle>
           <DialogDescription>
             {ownerName
-              ? `Creating a horse for ${ownerName}`
-              : "Add a new horse to the system"}
+              ? t("horses.creatingForOwner", { ownerName })
+              : t("horses.addNewHorse")}
           </DialogDescription>
         </DialogHeader>
 
@@ -121,9 +123,12 @@ export default function CreateHorseDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t("horses.name")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Thunder" {...field} />
+                    <Input
+                      placeholder={t("horses.namePlaceholder")}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -136,9 +141,12 @@ export default function CreateHorseDialog({
               name="breed"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Breed</FormLabel>
+                  <FormLabel>{t("horses.breed")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Arabian" {...field} />
+                    <Input
+                      placeholder={t("horses.breedPlaceholder")}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -151,7 +159,7 @@ export default function CreateHorseDialog({
               name="age"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Age</FormLabel>
+                  <FormLabel>{t("horses.age")}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -166,15 +174,19 @@ export default function CreateHorseDialog({
                 </FormItem>
               )}
             />
+
             {/* Location */}
             <FormField
               control={form.control}
               name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Location</FormLabel>
+                  <FormLabel>{t("horses.location")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Stable A, Barn 3" {...field} />
+                    <Input
+                      placeholder={t("horses.locationPlaceholder")}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -187,7 +199,7 @@ export default function CreateHorseDialog({
               name="feederId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Feeder (Optional)</FormLabel>
+                  <FormLabel>{t("horses.feeder")}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
@@ -195,13 +207,13 @@ export default function CreateHorseDialog({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a feeder" />
+                        <SelectValue placeholder={t("horses.selectFeeder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {feederOptions.length === 0 ? (
                         <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                          No unassigned feeders available
+                          {t("horses.noUnassignedFeeders")}
                         </div>
                       ) : (
                         feederOptions.map((option: any) => (
@@ -223,7 +235,7 @@ export default function CreateHorseDialog({
               name="cameraId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Camera (Optional)</FormLabel>
+                  <FormLabel>{t("horses.camera")}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
@@ -231,13 +243,13 @@ export default function CreateHorseDialog({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a camera" />
+                        <SelectValue placeholder={t("horses.selectCamera")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {cameraOptions.length === 0 ? (
                         <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                          No unassigned cameras available
+                          {t("horses.noUnassignedCameras")}
                         </div>
                       ) : (
                         cameraOptions.map((option: any) => (
@@ -259,7 +271,7 @@ export default function CreateHorseDialog({
               name="image"
               render={({ field: { value, onChange, ...field } }) => (
                 <FormItem>
-                  <FormLabel>Image (Optional)</FormLabel>
+                  <FormLabel>{t("horses.image")}</FormLabel>
                   <FormControl>
                     <Input
                       type="file"
@@ -284,11 +296,11 @@ export default function CreateHorseDialog({
                 onClick={() => setOpen(false)}
                 disabled={isPending}
               >
-                Cancel
+                {t("horses.cancel")}
               </Button>
               <Button type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Horse
+                {t("horses.create")}
               </Button>
             </div>
           </form>

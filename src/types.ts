@@ -139,6 +139,7 @@ export interface ActiveFeedingStats {
 export interface ActiveStreamStats {
   horseId: string;
   status: "STARTED" | "PENDING" | "IDLE";
+  streamToken?: string;
 }
 
 export interface HorsesStatsResponse {
