@@ -3,9 +3,12 @@ import toast from "react-hot-toast";
 import { useSearchParams } from "react-router-dom";
 import {
   createHorse as createHorseApi,
+  updateHorse as updateHorseApi,
   getAllHorses,
+  getHorse,
   getHorsesStats,
   getMyHorses,
+  deleteHorse as deleteHorseApi,
 } from "../../services/apiHorse";
 import { HORSE_USER_RES, LIMIT_RES } from "@/constants";
 import { HorsesStatsResponse } from "@/types";
@@ -115,4 +118,98 @@ export function useCreateHorse() {
   });
 
   return { createHorse, isPending, error };
+}
+
+export function useGetHorse(id: string, enabled: boolean = false) {
+  const {
+    data: { horse } = {},
+    isFetching,
+    error,
+  } = useQuery({
+    queryKey: ["horse", id],
+    queryFn: () => getHorse(id),
+    enabled: enabled && !!id,
+  });
+
+  return { horse, isFetching, error };
+}
+
+export function useUpdateHorse() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  const {
+    mutate: updateHorse,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: {
+        name: string;
+        breed: string;
+        age: number;
+        location: string;
+        feederId?: string;
+        cameraId?: string;
+        image?: File;
+      };
+    }) => updateHorseApi(id, payload),
+
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["horses"] });
+      queryClient.invalidateQueries({ queryKey: ["devices"] });
+
+      //to make the options up to date to prevent making duplation errors
+      queryClient.invalidateQueries({ queryKey: ["device-options"] });
+
+      queryClient.invalidateQueries({ queryKey: ["horse", variables.id] });
+
+      toast.success(t("common.updatedSuccess"));
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || t("common.updatedFailed"));
+    },
+  });
+
+  return { updateHorse, isPending, error };
+}
+
+export function useDeleteHorse() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  const {
+    mutate: deleteHorse,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: ({
+      id,
+      deleteDevices,
+    }: {
+      id: string;
+      deleteDevices: boolean;
+    }) => deleteHorseApi(id, deleteDevices),
+
+    onSuccess: () => {
+      // horses list updates
+      queryClient.invalidateQueries({ queryKey: ["horses"] });
+
+      // devices may become unassigned OR deleted (if deleteDevices=true)
+      queryClient.invalidateQueries({ queryKey: ["devices"] });
+      queryClient.invalidateQueries({ queryKey: ["device-options"] });
+
+      toast.success(t("common.deletedSuccess", "Deleted successfully"));
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message || t("common.deletedFailed", "Delete failed"));
+    },
+  });
+
+  return { deleteHorse, isPending, error };
 }

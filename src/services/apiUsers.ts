@@ -23,6 +23,10 @@ export async function apiRequest<T = any>(
     throw new Error((error as any).message || `HTTP ${response.status}`);
   }
 
+  if (response.status === 204 || response.status === 205) {
+    return null as T;
+  }
+
   return response.json() as Promise<T>;
 }
 
@@ -37,4 +41,12 @@ export async function getUsers(params: Record<string, any> = {}) {
     count: data.pagination.total,
     totalPages: data.pagination.totalPages,
   };
+}
+
+export async function deleteUser(id: string, deleteDevices: boolean) {
+  const url = `/users/${id}?deleteDevices=${deleteDevices}`;
+
+  return apiRequest(url, {
+    method: "DELETE",
+  });
 }

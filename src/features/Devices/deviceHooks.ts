@@ -1,5 +1,6 @@
 // src/hooks/useDeviceOptions.ts
 import { LIMIT_RES } from "@/constants";
+import { downloadFile } from "@/lib/utils";
 import {
   createDevice as createDeviceApi,
   forceUnassign as forceUnassignApi,
@@ -10,6 +11,7 @@ import {
   getMyFeeders,
   updateMyFeeder as updateMyFeederApi,
   updateDevice as updateDeviceApi,
+  deleteDevice as deleteDeviceApi,
 } from "@/services/apiDevices";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -227,12 +229,39 @@ export function useCreateDevice() {
     error,
   } = useMutation({
     mutationFn: createDeviceApi,
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Download credentials
+      if (data?.data?.credentials && data?.data?.device) {
+        const { certificate, privateKey } = data.data.credentials;
+        const { thingLabel } = data.data.device;
+
+        // Download certificate
+        downloadFile(
+          certificate,
+          `${thingLabel}-certificate.pem.txt`,
+          "application/x-pem-file",
+        );
+
+        // Download private key
+        downloadFile(
+          privateKey,
+          `${thingLabel}-private.pem.txt`,
+          "application/x-pem-file",
+        );
+
+        toast.success(
+          t(
+            "devices.deviceCreatedWithCredentials",
+            "Device created successfully! Credentials downloaded.",
+          ),
+        );
+      } else {
+        toast.success(t("devices.deviceCreatedSuccess"));
+      }
+
+      // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ["devices"] });
-
       queryClient.invalidateQueries({ queryKey: ["device-options"] });
-
-      toast.success(t("devices.deviceCreatedSuccess"));
     },
     onError: (error: Error) => {
       toast.error(error.message || t("devices.createDeviceFailed"));
@@ -256,6 +285,9 @@ export function useUnassignDevice() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
 
+      //to make the effect go to horses list and appear un assinging
+      queryClient.invalidateQueries({ queryKey: ["horses"] });
+
       queryClient.invalidateQueries({ queryKey: ["device-options"] });
 
       toast.success(t("devices.unassignDeviceSuccessful"));
@@ -267,4 +299,34 @@ export function useUnassignDevice() {
   });
 
   return { forceUnassign, isPending, error };
+}
+
+export function useDeleteDevice() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  const {
+    mutate: deleteDevice,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: deleteDeviceApi,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["devices"] });
+
+      //to make the effect go to horses list and appear un assinging
+      queryClient.invalidateQueries({ queryKey: ["horses"] });
+
+      queryClient.invalidateQueries({ queryKey: ["device-options"] });
+
+      toast.success(t("common.deletedSuccess"));
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message || t("common.deletedFailed"));
+    },
+  });
+
+  return { deleteDevice, isPending, error };
 }

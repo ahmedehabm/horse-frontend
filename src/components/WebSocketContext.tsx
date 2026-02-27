@@ -15,6 +15,7 @@ import {
   useMemo,
   ReactNode,
 } from "react";
+import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
 const SocketIOContext = createContext<SocketIOContextValue | null>(null);
@@ -114,6 +115,7 @@ export function SocketIOProvider({ children }: { children: ReactNode }) {
       // ✅ Error event from server
       socket.on("ERROR", (error) => {
         console.error("❌ Server error:", error);
+        toast.error(error.message);
         setConnectionError(error.message || "Server error occurred");
       });
     } catch (err) {

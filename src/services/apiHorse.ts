@@ -27,6 +27,11 @@ export async function apiRequest<T = any>(
     throw new Error((error as any).message || `HTTP ${response.status}`);
   }
 
+  //  204 No Content (and 205 Reset Content) have no body
+  if (response.status === 204 || response.status === 205) {
+    return null as T;
+  }
+
   return response.json() as Promise<T>;
 }
 // ==============================
@@ -46,7 +51,6 @@ export async function getMyHorses(params: Record<string, any> = {}) {
 }
 
 export async function getAllHorses(params: Record<string, any> = {}) {
-  console.log("ssasa");
   const query = new URLSearchParams(params).toString();
   const url = `/horses/${query ? `?${query}` : ""}`;
 
@@ -106,10 +110,55 @@ export async function createHorse(payload: {
   // Append file if exists
   if (payload.image) formData.append("image", payload.image);
 
-  console.log(formData);
-
   return apiRequest("/horses", {
     method: "POST",
     body: formData,
+  });
+}
+
+export async function getHorse(id: string) {
+  const data = await apiRequest(`/horses/${id}`);
+  return {
+    horse: data.data.horse,
+  };
+}
+
+export async function updateHorse(
+  id: string,
+  payload: {
+    name: string;
+    breed: string;
+    age: number;
+    location: string;
+    feederId?: string;
+    cameraId?: string;
+    image?: File;
+  },
+) {
+  const formData = new FormData();
+
+  // Append all text fields
+  formData.append("name", payload.name);
+  formData.append("breed", payload.breed);
+  formData.append("age", String(payload.age));
+  formData.append("location", payload.location);
+
+  if (payload.feederId) formData.append("feederId", payload.feederId);
+  if (payload.cameraId) formData.append("cameraId", payload.cameraId);
+
+  // Append file if exists
+  if (payload.image) formData.append("image", payload.image);
+
+  return apiRequest(`/horses/${id}`, {
+    method: "PATCH",
+    body: formData,
+  });
+}
+
+export async function deleteHorse(id: string, deleteDevices: boolean) {
+  const url = `/horses/${id}?deleteDevices=${deleteDevices}`;
+
+  return apiRequest(url, {
+    method: "DELETE",
   });
 }

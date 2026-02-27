@@ -64,6 +64,9 @@ export const getCreateHorseSchema = () =>
       .optional(),
   });
 
+export const getUpdateHorseSchema = () =>
+  getCreateHorseSchema().omit({ ownerId: true }).partial();
+
 export const getCreateCameraSchema = () =>
   z.object({
     thingLabel: z

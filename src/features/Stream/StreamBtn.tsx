@@ -38,9 +38,6 @@ export default function StreamBtn({ horse, className = "" }: StreamBtnProps) {
   const handleStreamStatus = useCallback(
     (data: StreamStatusPayload) => {
       if (data.horseId !== horse.id) return;
-
-      console.log(`📡 Stream status for ${horse.name}:`, data);
-
       if (data.status === "STARTED" && data.streamUrl) {
         const tokenMatch = data.streamUrl.match(/\/stream\/(.+)/);
         const extractedToken = tokenMatch?.[1];
@@ -92,9 +89,6 @@ export default function StreamBtn({ horse, className = "" }: StreamBtnProps) {
     handleStreamStatus,
   ]);
 
-  /**
-   * Start stream
-   */
   /**
    * Start stream
    */

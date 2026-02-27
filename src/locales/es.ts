@@ -13,8 +13,8 @@ export const es = {
       users: "Usuarios",
       manageHorses: "Gestionar Caballos",
       manageDevices: "Gestionar Dispositivos",
-      feeders: "Comederos",
-      myFeeders: "Mis Comederos",
+      feeders: "Alimentadores",
+      myFeeders: "Mis Alimentadores",
     },
     // Common
     common: {
@@ -28,6 +28,7 @@ export const es = {
       name: "Nombre",
       device: "dispositivo",
       location: "Ubicación",
+      horse: "Caballo",
       deviceName: "Nombre del Dispositivo",
       uniqueDevice: "Debe ser único para cada dispositivo",
       uniqueUser: "Debe ser único para cada usuario",
@@ -39,11 +40,18 @@ export const es = {
       actions: "Acciones",
 
       edit: "Editar",
+      delete: "Borrar",
       updatedSuccess: "Actualizado exitosamente",
+      deletedSuccess: "Eliminado exitosamente",
+
+      deleteDescription:
+        "Esta acción no se puede deshacer. Es una eliminación permanente.",
+      deletedFailed: "Error al eliminar",
+
       updatedFailed: "Error al actualizar",
     },
     sidebar: {
-      adminPortal: "Portal de Administración",
+      adminPortal: "Portal de Admin",
       userDashboard: "Panel de Usuario",
       administrator: "Administrador",
       user: "Usuario",
@@ -77,6 +85,18 @@ export const es = {
       unnamedUser: "Usuario sin nombre",
       updateUser: "Actualizar detalles del usuario",
       actions: "Acciones",
+
+      deleteTitle: "¿Eliminar usuario?",
+      deleteWarning: "Estás a punto de eliminar al usuario:",
+      horsesWillBeDeleted:
+        "Esto también eliminará {{count}} caballo(s) propiedad de este usuario.",
+      deleteIrreversible:
+        "Esta acción no se puede deshacer. El usuario y todos sus caballos serán eliminados permanentemente.",
+      deleteAlsoDevices: "También eliminar todos los dispositivos conectados",
+      deleteDevicesHint:
+        "Si se marca, todos los comederos y cámaras asignados a los caballos de este usuario también serán eliminados permanentemente.",
+      deletedSuccess: "Usuario eliminado exitosamente",
+      deletedFailed: "Error al eliminar usuario",
     },
     feedDialog: {
       title: "Alimentar a {{name}}",
@@ -91,9 +111,9 @@ export const es = {
       sendFailed:
         "Error al enviar comando de alimentación. Por favor intente de nuevo.",
 
-      waitingForWeight: "Esperando datos de peso del comedero...",
+      waitingForWeight: "Esperando datos de peso del Alimentador...",
       noWeightData:
-        "Datos de peso del comedero no disponibles aún. Por favor espere.",
+        "Datos de peso del Alimentador no disponibles aún. Por favor espere.",
       availableWeight: "Peso disponible",
       exceedsAvailableWeight:
         "{{requested}}kg solicitado excede {{available}}kg disponible",
@@ -105,18 +125,18 @@ export const es = {
       feederType: "Tipo de alimentador",
       deviceType: "Tipo de Dispositivo",
       horseAttached: "Caballo Asignado",
-      feeder: "Comedero",
+      feeder: "Alimentador",
       camera: "Cámara",
-      myFeeders: "Mis Comederos",
+      myFeeders: "Mis Alimentadores",
       createCamera: "Crear Cámara",
       createCameraDevice: "Crear Dispositivo de Cámara",
       addCameraDescription: "Agregar un nuevo dispositivo de cámara al sistema",
-      createFeeder: "Crear Comedero",
-      updateFeeder: "Actualizar Comedero",
+      createFeeder: "Crear Alimentador",
+      updateFeeder: "Actualizar Alimentador",
       deviceCreatedSuccess: "Dispositivo creado exitosamente",
-      feederUpdatedSuccess: "Comedero actualizado exitosamente",
+      feederUpdatedSuccess: "Alimentador actualizado exitosamente",
       createDeviceFailed: "Error al crear el dispositivo",
-      updateFeederFailed: "Error al actualizar el comedero",
+      updateFeederFailed: "Error al actualizar el Alimentador",
 
       unassignDeviceSuccessful:
         "El dispositivo ha sido desasignado correctamente.",
@@ -128,12 +148,12 @@ export const es = {
         "Está a punto de desasignar este dispositivo de su caballo. Esta acción no se puede deshacer automáticamente.",
       consequences: "Consecuencias:",
       consequenceFeeder1:
-        "( {{horseName}} ) ya no tendrá un comedero asignado.",
+        "( {{horseName}} ) ya no tendrá un Alimentador asignado.",
 
       consequenceFeeder2:
         "Todas las alimentaciones programadas para este caballo se detendrán.",
       consequenceFeeder3:
-        "La alimentación manual no estará disponible hasta que se asigne un nuevo comedero.",
+        "La alimentación manual no estará disponible hasta que se asigne un nuevo Alimentador.",
       consequenceCamera1: "( {{horseName}} ) ya no tendrá una cámara asignada.",
 
       consequenceCamera2:
@@ -161,7 +181,7 @@ export const es = {
     feedNowBtn: {
       feedNow: "ALIMENTAR AHORA",
       feeding: "ALIMENTANDO…",
-      noFeeder: "Sin comedero asignado",
+      noFeeder: "Sin Alimentador asignado",
       feedingInProgress: "Alimentación en progreso — por favor espere",
       feedHorse: "Alimentar a {{horseName}}",
       feedingCompleted:
@@ -181,11 +201,22 @@ export const es = {
       location: "Ubicación",
       locationPlaceholder: "Establo A, Granero 3",
       image: "Imagen",
-      feeder: "Comedero (Opcional)",
+      feeder: "Alimentador (Opcional)",
       camera: "Cámara (Opcional)",
-      noUnassignedFeeders: "No hay comederos sin asignar disponibles",
+
+      deleteAlsoDevices:
+        "Eliminar también los dispositivos conectados (alimentador/cámara)",
+      deleteDevicesHint:
+        "Si está marcado, se eliminarán el caballo y cualquier alimentador/cámara asignados.",
+
+      feederAlreadyAssigned:
+        "Este caballo ya está asignado al alimentador: {{feederName}}. Se recomienda forzar la desasignación de este dispositivo antes de reasignarlo.",
+      cameraAlreadyAssigned:
+        "Este caballo ya está asignado a la cámara: {{cameraName}}. Se recomienda forzar la desasignación de este dispositivo antes de reasignarla.",
+
+      noUnassignedFeeders: "No hay Alimentadors sin asignar disponibles",
       noUnassignedCameras: "No hay cámaras sin asignar disponibles",
-      selectFeeder: "Seleccionar un comedero",
+      selectFeeder: "Seleccionar un Alimentador",
       selectCamera: "Seleccionar una cámara",
       horseCreatedSuccess: "Caballo creado exitosamente",
       creatingForOwner: "Creando un caballo para {{ownerName}}",
@@ -215,7 +246,7 @@ export const es = {
     // Pagination
     pagination: {
       horses: "caballos",
-      feeders: "comedores",
+      feeders: "Alimentadores",
       devices: "dispositivos",
       users: "usuarios",
       page: "Página",
@@ -258,9 +289,9 @@ export const es = {
       amountMaxValue: "La cantidad no puede exceder 50 kg",
       timeOnTheHour: "Debe ser en punto (ej: 04:00, 8:00)",
       scheduledAmountRequired:
-        "La cantidad programada es requerida para comederos programados",
+        "La cantidad programada es requerida para Alimentadors programados",
       atLeastOneTime:
-        "Debe establecerse al menos un horario de alimentación para comederos PROGRAMADOS",
+        "Debe establecerse al menos un horario de alimentación para Alimentadors PROGRAMADOS",
       timeAlreadyUsed: "Este horario ya está usado en {{field}}",
       duplicateTimes: "Los horarios de alimentación no pueden estar duplicados",
     },

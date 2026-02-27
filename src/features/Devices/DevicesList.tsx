@@ -29,6 +29,7 @@ import CreateFeederDialog from "./CreateFeederForm";
 import CreateCameraDialog from "./CreateCameraForm";
 import ForceUnassignDialog from "./ForceUnassignDialog";
 import EditDeviceDialog from "./EditDeviceForm";
+import DeleteDeviceDialogDevice from "./DeleteDialogDevice";
 
 interface Device {
   id: string;
@@ -52,6 +53,12 @@ export default function DevicesList() {
 
   // State for the edit dialog
   const [editDeviceId, setEditDeviceId] = useState<string | null>(null);
+
+  // State for the delete dialog
+  const [deleteTarget, setDeleteTarget] = useState<{
+    deviceId: string;
+    deviceLabel: string;
+  } | null>(null);
 
   const DEVICE_TYPE_OPTIONS = [
     { value: "all", label: t("common.all", "All") },
@@ -152,6 +159,7 @@ export default function DevicesList() {
                       <TableCell className="font-medium">
                         {device.thingLabel}
                       </TableCell>
+
                       <TableCell>
                         <span
                           className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
@@ -164,6 +172,7 @@ export default function DevicesList() {
                             device.deviceType}
                         </span>
                       </TableCell>
+
                       <TableCell className="text-muted-foreground">
                         {horseName || "-"}
                       </TableCell>
@@ -189,7 +198,7 @@ export default function DevicesList() {
                               {t("common.edit", "Edit")}
                             </DropdownMenuItem>
 
-                            {/*  Only show Force Unassign for assigned devices */}
+                            {/* Only show Force Unassign for assigned devices */}
                             {isAssigned && (
                               <DropdownMenuItem
                                 onClick={() =>
@@ -205,6 +214,19 @@ export default function DevicesList() {
                                 {t("devices.forceUnassign", "Force Unassign")}
                               </DropdownMenuItem>
                             )}
+
+                            {/* Delete */}
+                            <DropdownMenuItem
+                              onClick={() =>
+                                setDeleteTarget({
+                                  deviceId: device.id,
+                                  deviceLabel: device.thingLabel,
+                                })
+                              }
+                              className="cursor-pointer text-destructive focus:text-destructive"
+                            >
+                              {t("common.delete", "Delete")}
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -226,7 +248,7 @@ export default function DevicesList() {
         </CardContent>
       </Card>
 
-      {/*  Edit Device Dialog */}
+      {/* Edit Device Dialog */}
       {editDeviceId && (
         <EditDeviceDialog
           deviceId={editDeviceId}
@@ -237,7 +259,7 @@ export default function DevicesList() {
         />
       )}
 
-      {/*  Force Unassign Confirmation Dialog */}
+      {/* Force Unassign Confirmation Dialog */}
       {unassignTarget && (
         <ForceUnassignDialog
           open={!!unassignTarget}
@@ -248,6 +270,18 @@ export default function DevicesList() {
           deviceLabel={unassignTarget.deviceLabel}
           deviceType={unassignTarget.deviceType}
           horseName={unassignTarget.horseName}
+        />
+      )}
+
+      {/* Delete Device Dialog */}
+      {deleteTarget && (
+        <DeleteDeviceDialogDevice
+          open={!!deleteTarget}
+          onOpenChange={(open) => {
+            if (!open) setDeleteTarget(null);
+          }}
+          deviceId={deleteTarget.deviceId}
+          deviceLabel={deleteTarget.deviceLabel}
         />
       )}
     </>

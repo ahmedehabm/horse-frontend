@@ -1,8 +1,8 @@
+// src/components/FeedNowBtn.tsx
 import { useState, useCallback, useRef, useEffect } from "react";
 import { FaUtensils } from "react-icons/fa";
 import toast from "react-hot-toast";
-import { useWebSocketMessage } from "@/components/hooks/useWebSocketMessage";
-import { FeedingStatusPayload, Horse } from "@/types";
+import { Horse } from "@/types";
 import FeedDialog from "./FeedDialog";
 import { useGetActiveFeedingStatus } from "../Horses/horseHooks";
 import { useTranslation } from "react-i18next";
@@ -20,39 +20,14 @@ export default function FeedNowBtn({
   const [dialogOpen, setDialogOpen] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Get current feeder weight
   const { weight: currentWeight } = useFeederWeight(horse.feeder?.thingName);
 
   const isFeedingInProgress =
     activeFeedingStatus &&
     ["PENDING", "STARTED", "RUNNING"].includes(activeFeedingStatus.status);
 
-  const handleFeedingStatus = useCallback(
-    (data: FeedingStatusPayload) => {
-      if (data.horseId !== horse.id) return;
-
-      if (data.status === "COMPLETED") {
-        toast.success(
-          t("feedNowBtn.feedingCompleted", { horseName: horse.name }),
-        );
-      }
-
-      if (data.status === "FAILED") {
-        toast.error(
-          t("feedNowBtn.feedingFailed", {
-            horseName: horse.name,
-            errorMessage:
-              data.errorMessage || t("feedNowBtn.feedHorse", { horseName: "" }),
-          }),
-        );
-      }
-    },
-    [horse.id, horse.name, t],
-  );
-
-  useWebSocketMessage("FEEDING_STATUS", handleFeedingStatus, [
-    handleFeedingStatus,
-  ]);
+  // ❌ REMOVED: No longer listening here
+  // useWebSocketMessage("FEEDING_STATUS", handleFeedingStatus);
 
   const handleOpenDialog = useCallback(() => {
     if (!horse.feeder) {

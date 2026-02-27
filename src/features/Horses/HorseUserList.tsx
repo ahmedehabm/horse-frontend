@@ -38,6 +38,16 @@ export default function HorseUserList() {
 
   return (
     <div className="space-y-4">
+      {/* <img
+        src={"/stream/abc"}
+        className="w-full h-full object-contain"
+        onError={() => {
+          console.error("Stream error for:");
+        }}
+        onLoad={() => {
+          console.log("Stream loaded:");
+        }}
+      /> */}
       {/* Horses List */}
       <div className="space-y-3">
         {horses.map((horse: Horse) => (

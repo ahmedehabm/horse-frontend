@@ -1,7 +1,8 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { MoreVertical } from "lucide-react";
+// src/features/Users/UsersList.tsx
+
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { MoreVertical } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,17 +26,26 @@ import { LIMIT_RES } from "@/constants";
 import Pagination from "@/components/Pagination";
 import { useGetUsers } from "./usersHooks";
 import CreateHorseDialog from "../Horses/CreateHorseForm";
+import DeleteUserDialog from "./DeleteDialogUser";
 
 interface User {
   id: string;
   name?: string;
   username: string;
+  _count: {
+    horses: number;
+  };
 }
 
 export default function UsersList() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { users, count, totalPages, isFetching, error } = useGetUsers();
+
+  const [deleteTarget, setDeleteTarget] = useState<{
+    userId: string;
+    userName: string;
+    horseCount: number;
+  } | null>(null);
 
   if (error) {
     return (
@@ -46,60 +56,72 @@ export default function UsersList() {
   const isInitialLoading = isFetching && users.length === 0;
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
-        <CardTitle>{t("users.title")}</CardTitle>
-      </CardHeader>
+    <>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle>{t("users.title")}</CardTitle>
+        </CardHeader>
 
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[280px]">{t("users.name")}</TableHead>
-              <TableHead>{t("auth.username")}</TableHead>
-              <TableHead className="w-[100px] text-right">
-                {t("users.actions")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[280px]">{t("users.name")}</TableHead>
+                <TableHead>{t("auth.username")}</TableHead>
+                <TableHead className="w-[120px]">
+                  {t("users.horses", "Horses")}
+                </TableHead>
+                <TableHead className="w-[100px] text-right">
+                  {t("users.actions")}
+                </TableHead>
+              </TableRow>
+            </TableHeader>
 
-          <TableBody>
-            {isInitialLoading ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[180px]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[220px]" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="ml-auto h-9 w-9 rounded-md" />
+            <TableBody>
+              {isInitialLoading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell>
+                      <Skeleton className="h-4 w-[180px]" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-[220px]" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-10" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="ml-auto h-9 w-9 rounded-md" />
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : users.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="text-center text-muted-foreground"
+                  >
+                    {t("users.noUsersFound")}
                   </TableCell>
                 </TableRow>
-              ))
-            ) : users.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={3}
-                  className="text-center text-muted-foreground"
-                >
-                  {t("users.noUsersFound")}
-                </TableCell>
-              </TableRow>
-            ) : (
-              users.map((u: User) => (
-                <TableRow key={u.id}>
-                  <TableCell className="font-medium">
-                    {u.name || t("users.unnamedUser")}
-                  </TableCell>
+              ) : (
+                users.map((u: User) => (
+                  <TableRow key={u.id}>
+                    <TableCell className="font-medium">
+                      {u.name || t("users.unnamedUser")}
+                    </TableCell>
 
-                  <TableCell className="text-muted-foreground">
-                    {u.username}
-                  </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {u.username}
+                    </TableCell>
 
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end">
+                    <TableCell>
+                      <span className="inline-flex items-center justify-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                        {u._count.horses}
+                      </span>
+                    </TableCell>
+
+                    <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -121,31 +143,48 @@ export default function UsersList() {
 
                           <DropdownMenuItem
                             onClick={() =>
-                              navigate(`/admin/users/${u.id}/edit`)
+                              setDeleteTarget({
+                                userId: u.id,
+                                userName: u.name || u.username,
+                                horseCount: u._count.horses,
+                              })
                             }
-                            className="cursor-pointer"
+                            className="cursor-pointer text-destructive focus:text-destructive"
                           >
-                            {t("users.updateUser")}
+                            {t("common.delete", "Delete")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
 
-        <div className="pt-4">
-          <Pagination
-            label={t("pagination.users")}
-            count={count}
-            totalPages={totalPages}
-            limit={LIMIT_RES}
-          />
-        </div>
-      </CardContent>
-    </Card>
+          <div className="pt-4">
+            <Pagination
+              label={t("pagination.users")}
+              count={count}
+              totalPages={totalPages}
+              limit={LIMIT_RES}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Delete User Dialog */}
+      {deleteTarget && (
+        <DeleteUserDialog
+          open={!!deleteTarget}
+          onOpenChange={(open) => {
+            if (!open) setDeleteTarget(null);
+          }}
+          userId={deleteTarget.userId}
+          userName={deleteTarget.userName}
+          horseCount={deleteTarget.horseCount}
+        />
+      )}
+    </>
   );
 }

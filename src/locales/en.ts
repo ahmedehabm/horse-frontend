@@ -58,6 +58,7 @@ export const en = {
       loadingMessage: "Please wait while we prepare everything",
       name: "Name",
       location: "Location",
+      horse: "Horse",
       deviceName: "Device Name",
       uniqueDevice: "Must be unique for each device",
       uniqueUser: "Must be unique for each user",
@@ -68,7 +69,15 @@ export const en = {
       none: "None",
       actions: "Actions",
       edit: "Edit",
+      delete: "Delete",
+      deleteDescription:
+        "This action cannot be undone. It is a permanent deletion.",
+
       updatedSuccess: "Updated successfully",
+      deletedSuccess: "Deleted successfully",
+
+      deletedFailed: "Failed to Delete",
+
       updatedFailed: "Failed to Update",
     },
 
@@ -100,6 +109,18 @@ export const en = {
       unnamedUser: "Unnamed User",
       updateUser: "Update user details",
       actions: "Actions",
+
+      deleteTitle: "Delete user?",
+      deleteWarning: "You are about to delete user:",
+      horsesWillBeDeleted:
+        "This will also delete {{count}} horse(s) owned by this user.",
+      deleteIrreversible:
+        "This action cannot be undone. The user and all their horses will be permanently deleted.",
+      deleteAlsoDevices: "Also delete all connected devices",
+      deleteDevicesHint:
+        "If checked, all feeders and cameras assigned to this user's horses will also be permanently deleted.",
+      deletedSuccess: "User deleted successfully",
+      deletedFailed: "Failed to delete user",
     },
 
     // Devices
@@ -192,6 +213,17 @@ export const en = {
       image: "Image",
       feeder: "Feeder (Optional)",
       camera: "Camera (Optional)",
+
+      deleteAlsoDevices: "Also delete connected devices (feeder/camera)",
+      deleteDevicesHint:
+        "If checked, the horse and any assigned feeder/camera will be deleted.",
+
+      feederAlreadyAssigned:
+        "This horse is already assigned to feeder: {{feederName}}. It is recommended to force unassign this device before reassigning.",
+
+      cameraAlreadyAssigned:
+        "This horse is already assigned to camera: {{cameraName}}. It is recommended to force unassign this device before reassigning.",
+
       noUnassignedFeeders: "No unassigned feeders available",
       noUnassignedCameras: "No unassigned cameras available",
       selectFeeder: "Select a feeder",

@@ -1,8 +1,11 @@
 // src/hooks/useGetUsers.ts
 import { LIMIT_RES } from "@/constants";
-import { getUsers } from "@/services/apiUsers";
+import { deleteUser as deleteUserApi, getUsers } from "@/services/apiUsers";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 
 export function useGetUsers() {
   const [searchParams] = useSearchParams();
@@ -19,4 +22,41 @@ export function useGetUsers() {
   });
 
   return { users, count, totalPages, isFetching, error };
+}
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  const {
+    mutate: deleteUser,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: ({
+      id,
+      deleteDevices,
+    }: {
+      id: string;
+      deleteDevices: boolean;
+    }) => deleteUserApi(id, deleteDevices),
+
+    onSuccess: () => {
+      // Invalidate all related queries
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["horses"] });
+      queryClient.invalidateQueries({ queryKey: ["devices"] });
+      queryClient.invalidateQueries({ queryKey: ["device-options"] });
+
+      toast.success(t("common.deletedSuccess", "User deleted successfully"));
+    },
+
+    onError: (error: Error) => {
+      toast.error(
+        error.message || t("common.deletedFailed", "Failed to delete user"),
+      );
+    },
+  });
+
+  return { deleteUser, isPending, error };
 }

@@ -82,7 +82,7 @@ export default function MyFeeders() {
 
                   {/* Horse Name */}
                   <span>
-                    {t("devices.horse", "Horse")}:{" "}
+                    {t("common.horse", "Horse")}:{" "}
                     {feeder.horsesAsFeeder[0]?.name ||
                       t("devices.unassigned", "Unassigned")}
                   </span>

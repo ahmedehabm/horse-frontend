@@ -19,11 +19,21 @@ export async function apiRequest<T = any>(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    console.error(error);
     throw new Error((error as any).message || `HTTP ${response.status}`);
   }
 
-  return response.json() as Promise<T>;
+  //  204 No Content (and 205 Reset Content) have no body
+  if (response.status === 204 || response.status === 205) {
+    return null as T;
+  }
+
+  //  If server didn't send JSON, don't try to parse it
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) {
+    return (await response.text()) as unknown as T;
+  }
+
+  return (await response.json()) as T;
 }
 
 export async function getDeviceOptions(params: Record<string, any> = {}) {
@@ -132,6 +142,14 @@ export async function updateDevice(
   return apiRequest(`/devices/${id}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+export async function deleteDevice(id: string) {
+  return apiRequest(`/devices/${id}`, {
+    method: "DELETE",
     headers: {
       "Content-Type": "application/json",
     },
