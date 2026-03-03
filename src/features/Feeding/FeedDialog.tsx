@@ -42,21 +42,21 @@ export default function FeedDialog({
     }
 
     // Validation 2: Check if weight data is available
-    if (maxWeight === null) {
-      toast.error(t("feedDialog.waitingForWeight"));
-      return;
-    }
+    // if (maxWeight === null) {
+    //   toast.error(t("feedDialog.waitingForWeight"));
+    //   return;
+    // }
 
-    // Validation 3: Check if requested amount exceeds available weight
-    if (amountNum > maxWeight) {
-      toast.error(
-        t("feedDialog.exceedsAvailableWeight", {
-          requested: amountNum.toFixed(2),
-          available: maxWeight.toFixed(2),
-        }),
-      );
-      return;
-    }
+    // // Validation 3: Check if requested amount exceeds available weight
+    // if (amountNum > maxWeight) {
+    //   toast.error(
+    //     t("feedDialog.exceedsAvailableWeight", {
+    //       requested: amountNum.toFixed(2),
+    //       available: maxWeight.toFixed(2),
+    //     }),
+    //   );
+    //   return;
+    // }
 
     if (!isConnected) {
       toast.error(t("feedDialog.notConnected"));
