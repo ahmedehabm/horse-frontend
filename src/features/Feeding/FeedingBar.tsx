@@ -1,5 +1,7 @@
+// src/components/Feeding/FeedingBar.tsx
+
 import { useCallback, useRef } from "react";
-import { FaCheckCircle, FaSpinner } from "react-icons/fa";
+import { FaCheckCircle, FaSpinner, FaExclamationCircle } from "react-icons/fa";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWebSocketMessage } from "../../components/hooks/useWebSocketMessage";
 import { Progress } from "@/components/ui/progress";
@@ -17,7 +19,9 @@ const progressMap: Record<string, number> = {
   PENDING: 10,
   STARTED: 30,
   RUNNING: 60,
+  STOPPING: 80,
   COMPLETED: 100,
+  STOPPED: 100,
   FAILED: 0,
 };
 
@@ -86,6 +90,30 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
         toast.success(t("feedNowBtn.feedingCompleted", { horseName }));
       }
 
+      if (data.status === "STOPPED") {
+        queryClient.setQueryData<HorsesStatsResponse>(
+          ["horses-stats"],
+          (oldData) => {
+            if (!oldData) return oldData;
+
+            return {
+              ...oldData,
+              activeFeedings: oldData.activeFeedings.filter(
+                (f) => f.horseId !== horseId,
+              ),
+            };
+          },
+        );
+
+        // Invalidate to refetch fresh data
+        queryClient.invalidateQueries({ queryKey: ["horses-stats"] });
+        toast.success(
+          t("feedNowBtn.feedingStopped", "Feeding stopped for {{horseName}}", {
+            horseName,
+          }),
+        );
+      }
+
       if (data.status === "FAILED") {
         toast.error(
           t("feedNowBtn.feedingFailed", {
@@ -112,6 +140,9 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
               };
             },
           );
+
+          // Invalidate to refetch fresh data
+          queryClient.invalidateQueries({ queryKey: ["horses-stats"] });
         }, 3000);
       }
     },
@@ -149,6 +180,14 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
           text: t("feedingBar.status.running"),
         };
 
+      case "STOPPING":
+        return {
+          ...base,
+          text: t("feedingBar.status.stopping", "Stopping..."),
+          bgColor: "bg-orange-50 border-orange-200",
+          icon: <FaSpinner className="animate-spin text-orange-500" />,
+        };
+
       case "COMPLETED":
         return {
           ...base,
@@ -157,10 +196,20 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
           icon: <FaCheckCircle className="text-emerald-600" />,
         };
 
+      case "STOPPED":
+        return {
+          ...base,
+          text: t("feedingBar.status.stopped", "Stopped"),
+          bgColor: "bg-amber-50 border-amber-200",
+          icon: <FaExclamationCircle className="text-amber-600" />,
+        };
+
       case "FAILED":
         return {
           ...base,
           text: t("feedingBar.status.failed"),
+          bgColor: "bg-rose-50 border-rose-200",
+          icon: <FaExclamationCircle className="text-rose-600" />,
         };
 
       default:
@@ -190,9 +239,13 @@ export default function FeedingBar({ horseId, horseName }: FeedingBarProps) {
             indicatorClassName={
               feeding.status === "COMPLETED"
                 ? "bg-gradient-to-r from-emerald-500 to-emerald-600"
-                : feeding.status === "FAILED"
-                  ? "bg-gradient-to-r from-rose-500 to-rose-600"
-                  : "bg-gradient-to-r from-teal-500 to-teal-600"
+                : feeding.status === "STOPPED"
+                  ? "bg-gradient-to-r from-amber-500 to-amber-600"
+                  : feeding.status === "STOPPING"
+                    ? "bg-gradient-to-r from-orange-500 to-orange-600"
+                    : feeding.status === "FAILED"
+                      ? "bg-gradient-to-r from-rose-500 to-rose-600"
+                      : "bg-gradient-to-r from-teal-500 to-teal-600"
             }
           />
           <div className="flex items-center justify-between text-xs">

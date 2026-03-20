@@ -186,6 +186,22 @@ export const en = {
 
     // Feeding
     feeding: {
+      stopFeeding: "STOP FEEDING",
+      stopping: "Stopping...",
+      stopFailed: "Failed to stop feeding",
+      stoppingFeeding: "Stopping feeding...",
+      forceStop: "Force Stop",
+      forceStopFailed: "Failed to force stop",
+      forceStopped: "Feeding stopped manually",
+      stopFeedingTitle: "Stop Feeding?",
+      stopFeedingDescription:
+        "This will send a stop command to the feeder device. The device will stop feeding {{horseName}}.",
+      forceStopTitle: "Force Stop Feeding?",
+      forceStopWarning: "⚠️ WARNING: This is a manual override.",
+      forceStopDescription:
+        "The device did not respond to the stop command. This will manually mark the feeding as stopped WITHOUT device confirmation.",
+      forceStopNote:
+        "Use this only if the device is offline or not responding.",
       lastFeed: "Last Feed",
     },
 

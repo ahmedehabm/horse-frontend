@@ -167,6 +167,25 @@ export const es = {
   //   },
   //   // Feeding
   //   feeding: {
+  //     stopFeeding: "DETENER ALIMENTACIÓN",
+  //     stopping: "Deteniendo...",
+  //     stopFailed: "Error al detener la alimentación",
+  //     stoppingFeeding: "Deteniendo alimentación...",
+  //     stoppedSuccessfully: "Alimentación detenida exitosamente",
+  //     forceStop: "Forzar Detención",
+  //     forceStopFailed: "Error al forzar detención",
+  //     forceStopSent:
+  //       "Comando de detención forzada enviado. Esperando confirmación...",
+  //     forceStopTooltip: "Forzar detención si el dispositivo está desconectado",
+  //     stopFeedingTitle: "¿Detener Alimentación?",
+  //     stopFeedingDescription:
+  //       "Esto enviará un comando de detención al dispositivo alimentador. El dispositivo dejará de alimentar a {{horseName}}.",
+  //     forceStopTitle: "¿Forzar Detención de Alimentación?",
+  //     forceStopWarning: "⚠️ ADVERTENCIA: Esta es una anulación manual.",
+  //     forceStopDescription:
+  //       "El dispositivo no respondió al comando de detención. Esto marcará manualmente la alimentación como detenida SIN confirmación del dispositivo.",
+  //     forceStopNote:
+  //       "Use esto solo si el dispositivo está desconectado o no responde.",
   //     lastFeed: "Últ.",
   //   },
   //   feedNowBtn: {

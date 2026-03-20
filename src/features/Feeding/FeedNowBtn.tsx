@@ -7,6 +7,7 @@ import FeedDialog from "./FeedDialog";
 import { useGetActiveFeedingStatus } from "../Horses/horseHooks";
 import { useTranslation } from "react-i18next";
 import { useFeederWeight } from "@/components/hooks/useFeederWeight";
+import StopFeedingBtn from "./StopFeedingBtn";
 
 export default function FeedNowBtn({
   horse,
@@ -18,16 +19,14 @@ export default function FeedNowBtn({
   const { t } = useTranslation();
   const { activeFeedingStatus } = useGetActiveFeedingStatus(horse.id);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { weight: currentWeight } = useFeederWeight(horse.feeder?.thingName);
 
   const isFeedingInProgress =
     activeFeedingStatus &&
-    ["PENDING", "STARTED", "RUNNING"].includes(activeFeedingStatus.status);
-
-  // ❌ REMOVED: No longer listening here
-  // useWebSocketMessage("FEEDING_STATUS", handleFeedingStatus);
+    ["PENDING", "STARTED", "RUNNING", "STOPPING"].includes(
+      activeFeedingStatus.status,
+    );
 
   const handleOpenDialog = useCallback(() => {
     if (!horse.feeder) {
@@ -43,17 +42,20 @@ export default function FeedNowBtn({
     setDialogOpen(true);
   }, [horse, isFeedingInProgress, t]);
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
+  // Show stop button if feeding is in progress
+  if (isFeedingInProgress) {
+    return (
+      <StopFeedingBtn
+        horse={horse}
+        feedingStatus={activeFeedingStatus.status as any}
+        className={className}
+      />
+    );
+  }
 
-  const isDisabled = !horse.feeder || isFeedingInProgress;
+  const isDisabled = !horse.feeder;
 
   const getButtonStyles = () => {
-    if (isFeedingInProgress)
-      return "bg-gray-400 text-gray-700 cursor-not-allowed";
     if (!horse.feeder) return "bg-gray-300 text-gray-500 cursor-not-allowed";
     return "bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:shadow-xl";
   };
@@ -62,22 +64,16 @@ export default function FeedNowBtn({
     <>
       <button
         onClick={handleOpenDialog}
-        disabled={isDisabled!}
+        disabled={isDisabled}
         className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl shadow-lg transition-all duration-200 text-sm ${getButtonStyles()} ${className}`}
         title={
           !horse.feeder
             ? t("feedNowBtn.noFeeder")
-            : isFeedingInProgress
-              ? t("feedNowBtn.feedingInProgress")
-              : t("feedNowBtn.feedHorse", { horseName: horse.name })
+            : t("feedNowBtn.feedHorse", { horseName: horse.name })
         }
       >
         <FaUtensils className="text-sm" />
-        <span>
-          {isFeedingInProgress
-            ? t("feedNowBtn.feeding")
-            : t("feedNowBtn.feedNow")}
-        </span>
+        <span>{t("feedNowBtn.feedNow")}</span>
       </button>
 
       <FeedDialog

@@ -233,19 +233,19 @@ export function useCreateDevice() {
       // Download credentials
       if (data?.data?.credentials && data?.data?.device) {
         const { certificate, privateKey } = data.data.credentials;
-        const { thingLabel } = data.data.device;
+        const { thingName } = data.data.device;
 
         // Download certificate
         downloadFile(
           certificate,
-          `${thingLabel}-certificate.pem.txt`,
+          `${thingName}-certificate.pem.txt`,
           "application/x-pem-file",
         );
 
         // Download private key
         downloadFile(
           privateKey,
-          `${thingLabel}-private.pem.txt`,
+          `${thingName}-private.pem.txt`,
           "application/x-pem-file",
         );
 
