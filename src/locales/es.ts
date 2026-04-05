@@ -74,7 +74,7 @@ export const es = {
   //   // Users
   //   users: {
   //     title: "Usuarios",
-  //     signupUsers: "Registrar Usuarios",
+  //     signupUsers: "Agregar usuario",
   //     name: "Nombre",
   //     createUser: "Crear Usuario",
   //     createHorseForUser: "Crear un caballo para este usuario",
@@ -127,6 +127,7 @@ export const es = {
   //     createCameraDevice: "Crear Dispositivo de Cámara",
   //     addCameraDescription: "Agregar un nuevo dispositivo de cámara al sistema",
   //     createFeeder: "Crear Alimentador",
+  //     viewFeeder: "VER ALIMENTADOR",
   //     updateFeeder: "Actualizar Alimentador",
   //     deviceCreatedSuccess: "Dispositivo creado exitosamente",
   //     feederUpdatedSuccess: "Alimentador actualizado exitosamente",

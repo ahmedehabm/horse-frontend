@@ -100,7 +100,7 @@ export const en = {
     // Users
     users: {
       title: "Users",
-      signupUsers: "Signup Users",
+      signupUsers: "Add User",
       name: "Name",
       createUser: "Create User",
       createHorseForUser: "Create a horse for this user",
@@ -138,6 +138,7 @@ export const en = {
 
       createFeeder: "Create Feeder",
       updateFeeder: "Update Feeder",
+      viewFeeder: "VIEW FEEDER",
 
       deviceCreatedSuccess: "Device created successfully",
       deviceUpdatedSuccess: "Device updated successfully",

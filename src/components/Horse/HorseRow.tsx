@@ -1,3 +1,5 @@
+// src/components/Horse/HorseRow.tsx
+
 import { FaVideo, FaUtensils, FaClock } from "react-icons/fa";
 import { Horse } from "@/types";
 import StreamBtn from "@/features/Stream/StreamBtn";
@@ -5,6 +7,7 @@ import FeederWeight from "@/features/Feeding/FeederWeight";
 import FeedNowBtn from "@/features/Feeding/FeedNowBtn";
 import FeedingBar from "@/features/Feeding/FeedingBar";
 import { useTranslation } from "react-i18next";
+import ViewFeederBtn from "@/features/Feeding/ViewMyFeederBtn";
 
 export default function HorseRow({ horse }: { horse: Horse }) {
   const { t } = useTranslation();
@@ -32,11 +35,11 @@ export default function HorseRow({ horse }: { horse: Horse }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200">
+    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 p-4">
       {/* Main Content */}
       <div className="p-4">
         {/* Mobile Layout: Stack everything (< 768px) */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           {/* Top Section: Image + Name + Feeder Info */}
           <div className="flex items-start gap-3 mb-3">
             <div className="shrink-0">
@@ -80,11 +83,12 @@ export default function HorseRow({ horse }: { horse: Horse }) {
           <div className="flex flex-col gap-2">
             <FeedNowBtn horse={horse} className="w-full" />
             <StreamBtn horse={horse} className="w-full" />
+            <ViewFeederBtn horse={horse} className="w-full" />
           </div>
         </div>
 
         {/* Tablet & Desktop Layout: Horizontal (>= 768px) */}
-        <div className="hidden md:flex items-center justify-between">
+        <div className="hidden lg:flex items-center justify-between">
           {/* Left Section */}
           <div className="flex items-center flex-1 min-w-0">
             <div className="shrink-0">
@@ -129,6 +133,7 @@ export default function HorseRow({ horse }: { horse: Horse }) {
           <div className="flex items-center gap-3 ml-6 shrink-0">
             <FeedNowBtn horse={horse} />
             <StreamBtn horse={horse} />
+            <ViewFeederBtn horse={horse} />
           </div>
         </div>
       </div>

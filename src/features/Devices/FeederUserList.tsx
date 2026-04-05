@@ -16,7 +16,6 @@ interface Feeder {
 export default function MyFeeders() {
   const { t } = useTranslation();
   const { feeders, count, totalPages, isFetching, error } = useGetMyFeeders();
-
   if (error) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4">

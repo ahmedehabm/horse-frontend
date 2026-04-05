@@ -1,6 +1,6 @@
 // src/components/FeedNowBtn.tsx
-import { useState, useCallback, useRef, useEffect } from "react";
-import { FaUtensils } from "react-icons/fa";
+import { useState, useCallback } from "react";
+import { FaHorseHead } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { Horse } from "@/types";
 import FeedDialog from "./FeedDialog";
@@ -72,7 +72,7 @@ export default function FeedNowBtn({
             : t("feedNowBtn.feedHorse", { horseName: horse.name })
         }
       >
-        <FaUtensils className="text-sm" />
+        <FaHorseHead />
         <span>{t("feedNowBtn.feedNow")}</span>
       </button>
 

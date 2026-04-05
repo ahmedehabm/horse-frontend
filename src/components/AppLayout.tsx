@@ -23,7 +23,7 @@ export default function AppLayout({
     <WebSocketProvider>
       <div className="min-h-screen bg-linear-to-br from-green-50 to-emerald-50">
         {/* Mobile Header */}
-        <header className="lg:hidden bg-white/80 backdrop-blur-md border-b border-green-100 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
+        <header className="xl:hidden bg-white/80 backdrop-blur-md border-b border-green-100 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
           <h2 className="text-xl font-bold bg-linear-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent">
             {isAdmin ? t("nav.dashboard") + " Admin" : t("nav.dashboard")}
           </h2>
@@ -49,7 +49,7 @@ export default function AppLayout({
           {/* Main Content */}
           <div className="flex-1 flex flex-col min-h-screen">
             {/* Desktop Header */}
-            <header className="hidden lg:flex bg-white/90 backdrop-blur-md border-b border-green-100 px-8 py-6 items-center justify-between sticky top-0 z-10 shadow-sm">
+            <header className="hidden xl:flex bg-white/90 backdrop-blur-md border-b border-green-100 px-8 py-6 items-center justify-between sticky top-0 z-10 shadow-sm">
               <div className="flex items-center space-x-4">
                 <h1 className="text-2xl font-bold text-gray-800">
                   {t("common.welcomeBack")},
@@ -65,7 +65,7 @@ export default function AppLayout({
             </header>
 
             {/* Main Content Area */}
-            <main className="flex-1 p-6 lg:p-8 xl:p-10 overflow-y-auto">
+            <main className="flex-1 p-6  xl:p-10 overflow-y-auto">
               <div className="max-w-7xl mx-auto">
                 <Outlet />
               </div>

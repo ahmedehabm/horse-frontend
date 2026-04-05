@@ -44,7 +44,7 @@ export default function Sidebar({
             icon: FaTachometerAlt,
             key: "nav.dashboard",
           },
-          { to: "/user/feeders", icon: FaTachometerAlt, key: "nav.feeders" },
+          // { to: "/user/feeders", icon: FaTachometerAlt, key: "nav.feeders" },
         ];
 
   async function handleLogout() {
@@ -66,7 +66,7 @@ export default function Sidebar({
       <aside
         className={`${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 fixed lg:sticky top-0 left-0 h-screen w-64 lg:w-80 bg-white/80 backdrop-blur-md border-r border-green-100 shadow-xl flex flex-col transition-all duration-300 ease-in-out z-30 lg:z-auto`}
+        } xl:translate-x-0 fixed xl:sticky top-0 left-0 h-screen w-64 xl:w-80 bg-white/80 backdrop-blur-md border-r border-green-100 shadow-xl flex flex-col transition-all duration-300 ease-in-out z-30 xl:z-auto`}
       >
         {/* Header */}
         <div className="px-6 py-6 border-b border-green-100 bg-linear-to-r from-green-50 to-emerald-50">
@@ -165,7 +165,7 @@ export default function Sidebar({
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-20"
+          className="xl:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-20"
         />
       )}
     </>

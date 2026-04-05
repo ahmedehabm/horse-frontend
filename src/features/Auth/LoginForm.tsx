@@ -21,7 +21,7 @@ export default function LoginForm() {
     <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-green-50 to-white">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
         {/* Logo */}
-        <div className="flex justify-center mb-8">
+        <div className="flex justify-center mb-16">
           <div className="flex items-center">
             <svg
               className="h-12 w-12 text-green-700"
@@ -45,9 +45,9 @@ export default function LoginForm() {
 
         {/* Login Form */}
         <div>
-          <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          {/* <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
             Welcome Back
-          </h2>
+          </h2> */}
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
