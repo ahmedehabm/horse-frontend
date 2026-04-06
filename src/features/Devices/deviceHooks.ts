@@ -150,9 +150,10 @@ export function useUpdateMyFeeder() {
     }) => updateMyFeederApi(id, payload),
 
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["my-feeders"] });
-
+      queryClient.invalidateQueries({ queryKey: ["horses-user"] });
       queryClient.invalidateQueries({ queryKey: ["my-feeder", variables.id] });
+
+      // queryClient.invalidateQueries({ queryKey: ["my-feeders"] });
 
       toast.success(t("devices.feederUpdatedSuccess"));
     },
